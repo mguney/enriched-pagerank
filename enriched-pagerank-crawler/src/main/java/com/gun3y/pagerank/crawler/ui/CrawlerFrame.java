@@ -132,7 +132,9 @@ public class CrawlerFrame extends JFrame {
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                CrawlerFrame.this.mongoManager.close();
+                if (CrawlerFrame.this.mongoManager != null) {
+                    CrawlerFrame.this.mongoManager.close();
+                }
             }
         });
         this.initialize();
