@@ -11,7 +11,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.gun3y</groupId>
-			<artifactId>enriched-pagerank-data</artifactId>
+			<artifactId>enriched-pagerank-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
