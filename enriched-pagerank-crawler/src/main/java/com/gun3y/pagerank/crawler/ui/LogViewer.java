@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gun3y.pagerank.mongo.MongoManager;
+import com.gun3y.pagerank.page.HtmlPage;
 
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 
@@ -46,7 +47,7 @@ public class LogViewer extends JDialog {
             while (true) {
 
                 if (LogViewer.this.mongoManager != null) {
-                    long count = LogViewer.this.mongoManager.getCount();
+                    long count = LogViewer.this.mongoManager.getCount(HtmlPage.class);
                     LogViewer.this.lblPageSize.setText(count + "");
                 }
                 else {

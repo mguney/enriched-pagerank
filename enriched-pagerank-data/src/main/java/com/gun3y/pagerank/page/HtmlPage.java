@@ -6,7 +6,7 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
-@Entity("HtmlPage")
+@Entity
 public class HtmlPage implements Serializable {
 
     private static final long serialVersionUID = 6915863557498073804L;

@@ -8,11 +8,6 @@
 	<artifactId>enriched-pagerank-data</artifactId>
 	<dependencies>
 		<dependency>
-			<groupId>com.gun3y</groupId>
-			<artifactId>enriched-pagerank-common</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.mongodb.morphia</groupId>
 			<artifactId>morphia</artifactId>
 		</dependency>

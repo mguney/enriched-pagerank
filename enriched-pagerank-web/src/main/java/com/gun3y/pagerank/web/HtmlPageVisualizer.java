@@ -14,6 +14,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gun3y.pagerank.mongo.HtmlPageRunner;
 import com.gun3y.pagerank.mongo.MongoManager;
 import com.gun3y.pagerank.page.HtmlPage;
 import com.gun3y.pagerank.page.WebUrl;
@@ -21,56 +22,59 @@ import com.gun3y.pagerank.web.d3.Node;
 import com.gun3y.pagerank.web.d3.NodeLink;
 import com.gun3y.pagerank.web.d3.Stat;
 
-public class HtmlpageVisualizer {
+public class HtmlPageVisualizer {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HtmlpageVisualizer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HtmlPageVisualizer.class);
 
     public static void main(String[] args) throws UnknownHostException {
         MongoManager mongoManager = new MongoManager();
         mongoManager.init();
-        Map<Integer, Pair<Set<Integer>, Set<Integer>>> pageRanks = new HashMap<Integer, Pair<Set<Integer>, Set<Integer>>>();
+        final Map<Integer, Pair<Set<Integer>, Set<Integer>>> pageRanks = new HashMap<Integer, Pair<Set<Integer>, Set<Integer>>>();
 
-        Map<Integer, Pair<String, Integer>> idMap = new HashMap<Integer, Pair<String, Integer>>();
+        final Map<Integer, Pair<String, Integer>> idMap = new HashMap<Integer, Pair<String, Integer>>();
 
-        List<HtmlPage> htmlPages = mongoManager.getHtmlPages();
-        for (HtmlPage htmlPage : htmlPages) {
+        mongoManager.runOnHtmlPages(new HtmlPageRunner() {
 
-            WebUrl webUrl = htmlPage.getUrl();
+            @Override
+            public void run(HtmlPage htmlPage) {
+                WebUrl webUrl = htmlPage.getUrl();
 
-            int docid = webUrl.getDocid();
-            idMap.put(docid, new MutablePair<String, Integer>(webUrl.getUrl(), webUrl.getParentDocid()));
+                int docid = webUrl.getDocid();
+                idMap.put(docid, new MutablePair<String, Integer>(webUrl.getUrl(), webUrl.getParentDocid()));
 
-            if (!pageRanks.containsKey(docid)) {
-                pageRanks.put(docid, new MutablePair<Set<Integer>, Set<Integer>>(new HashSet<Integer>(), new HashSet<Integer>()));
-            }
+                if (!pageRanks.containsKey(docid)) {
+                    pageRanks.put(docid, new MutablePair<Set<Integer>, Set<Integer>>(new HashSet<Integer>(), new HashSet<Integer>()));
+                }
 
-            Pair<Set<Integer>, Set<Integer>> values = pageRanks.get(docid);
-            Set<Integer> outgoing = values.getValue();
+                Pair<Set<Integer>, Set<Integer>> values = pageRanks.get(docid);
+                Set<Integer> outgoing = values.getValue();
 
-            Set<WebUrl> outgoingUrls = htmlPage.getHtmlData().getOutgoingUrls();
-            if (outgoingUrls != null) {
-                for (WebUrl wUrl : outgoingUrls) {
-                    if (wUrl.getDocid() > -1) {
-                        int oDocid = wUrl.getDocid();
+                Set<WebUrl> outgoingUrls = htmlPage.getHtmlData().getOutgoingUrls();
+                if (outgoingUrls != null) {
+                    for (WebUrl wUrl : outgoingUrls) {
+                        if (wUrl.getDocid() > -1) {
+                            int oDocid = wUrl.getDocid();
 
-                        idMap.put(oDocid, new MutablePair<String, Integer>(wUrl.getUrl(), wUrl.getParentDocid()));
+                            idMap.put(oDocid, new MutablePair<String, Integer>(wUrl.getUrl(), wUrl.getParentDocid()));
 
-                        if (!pageRanks.containsKey(oDocid)) {
-                            pageRanks.put(oDocid, new MutablePair<Set<Integer>, Set<Integer>>(new HashSet<Integer>(),
-                                    new HashSet<Integer>()));
+                            if (!pageRanks.containsKey(oDocid)) {
+                                pageRanks.put(oDocid, new MutablePair<Set<Integer>, Set<Integer>>(new HashSet<Integer>(),
+                                        new HashSet<Integer>()));
+                            }
+
+                            Pair<Set<Integer>, Set<Integer>> oValues = pageRanks.get(oDocid);
+                            Set<Integer> incoming = oValues.getKey();
+                            incoming.add(docid);
+
+                            outgoing.add(oDocid);
+
                         }
 
-                        Pair<Set<Integer>, Set<Integer>> oValues = pageRanks.get(oDocid);
-                        Set<Integer> incoming = oValues.getKey();
-                        incoming.add(docid);
-
-                        outgoing.add(oDocid);
-
                     }
-
                 }
+
             }
-        }
+        });
 
         List<Node> index = new ArrayList<Node>();
         for (Integer id : idMap.keySet()) {
