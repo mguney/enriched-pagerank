@@ -12,7 +12,7 @@
 	</properties>
 	<modules>
 		<module>enriched-pagerank-crawler</module>
-		<module>enriched-pagerank-data</module>
+		<module>enriched-pagerank-core</module>
 		<module>enriched-pagerank-web</module>
 	</modules>
 	<build>
