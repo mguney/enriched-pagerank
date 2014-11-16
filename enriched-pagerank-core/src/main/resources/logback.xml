@@ -1,7 +1,7 @@
 <configuration>
 
     <property name="LOG_HOME" value="logs" />
-    <property name="LOG_FILE_NAME" value="/enriched-pagerank-data.log" />
+    <property name="LOG_FILE_NAME" value="/enriched-pagerank-core.log" />
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -18,7 +18,7 @@
 
 
     <root level="debug">
-        <appender-ref ref="STDOUT" />
-        <!--<appender-ref ref="FILE" />-->
+        <!-- <appender-ref ref="STDOUT" /> -->
+        <appender-ref ref="FILE" />
     </root>
 </configuration>

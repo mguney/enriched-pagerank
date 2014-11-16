@@ -1,6 +1,6 @@
 package com.gun3y.pagerank.mongo;
 
-import com.gun3y.pagerank.page.HtmlPage;
+import com.gun3y.pagerank.entity.html.HtmlPage;
 
 public interface HtmlPageRunner {
 

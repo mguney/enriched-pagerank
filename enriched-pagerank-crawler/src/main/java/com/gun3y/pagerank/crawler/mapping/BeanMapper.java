@@ -2,7 +2,7 @@ package com.gun3y.pagerank.crawler.mapping;
 
 import org.dozer.DozerBeanMapper;
 
-import com.gun3y.pagerank.page.HtmlPage;
+import com.gun3y.pagerank.entity.html.HtmlPage;
 
 import edu.uci.ics.crawler4j.crawler.Page;
 

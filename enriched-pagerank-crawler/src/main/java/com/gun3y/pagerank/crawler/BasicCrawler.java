@@ -8,8 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gun3y.pagerank.crawler.mapping.BeanMapper;
+import com.gun3y.pagerank.entity.html.HtmlPage;
 import com.gun3y.pagerank.mongo.MongoManager;
-import com.gun3y.pagerank.page.HtmlPage;
 
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;

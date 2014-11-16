@@ -1,8 +1,8 @@
 package com.gun3y.pagerank.mongo;
 
-import com.gun3y.pagerank.graph.GraphNode;
-import com.gun3y.pagerank.page.HtmlPage;
-import com.gun3y.pagerank.page.WebUrl;
+import com.gun3y.pagerank.entity.graph.GraphNode;
+import com.gun3y.pagerank.entity.html.HtmlPage;
+import com.gun3y.pagerank.entity.html.WebUrl;
 
 public class MongoUtils {
 
@@ -12,12 +12,7 @@ public class MongoUtils {
         WebUrl webUrl = htmlPage.getUrl();
         graphNode.setPageId(webUrl.getDocid());
         graphNode.setUrl(webUrl.getUrl());
-
         graphNode.setPageRank(0.15d);
-
-        if (htmlPage.getHtmlData() != null) {
-            graphNode.setHtml(htmlPage.getHtmlData().getHtml());
-        }
 
         return graphNode;
     }

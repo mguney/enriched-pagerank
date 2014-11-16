@@ -1,4 +1,4 @@
-package com.gun3y.pagerank.page;
+package com.gun3y.pagerank.entity.html;
 
 import java.io.Serializable;
 

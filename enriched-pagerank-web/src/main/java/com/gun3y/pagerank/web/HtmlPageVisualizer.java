@@ -14,10 +14,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gun3y.pagerank.entity.html.HtmlPage;
+import com.gun3y.pagerank.entity.html.WebUrl;
 import com.gun3y.pagerank.mongo.HtmlPageRunner;
 import com.gun3y.pagerank.mongo.MongoManager;
-import com.gun3y.pagerank.page.HtmlPage;
-import com.gun3y.pagerank.page.WebUrl;
 import com.gun3y.pagerank.web.d3.Node;
 import com.gun3y.pagerank.web.d3.NodeLink;
 import com.gun3y.pagerank.web.d3.Stat;

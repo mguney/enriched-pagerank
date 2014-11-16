@@ -18,9 +18,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.gun3y.pagerank.page.HtmlData;
-import com.gun3y.pagerank.page.HtmlPage;
-import com.gun3y.pagerank.page.WebUrl;
+import com.gun3y.pagerank.entity.html.HtmlData;
+import com.gun3y.pagerank.entity.html.HtmlPage;
+import com.gun3y.pagerank.entity.html.WebUrl;
 
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
