@@ -1,5 +1,7 @@
 package com.gun3y.pagerank.crawler;
 
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -8,8 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gun3y.pagerank.crawler.mapping.BeanMapper;
+import com.gun3y.pagerank.entity.html.HtmlData;
 import com.gun3y.pagerank.entity.html.HtmlPage;
 import com.gun3y.pagerank.mongo.MongoManager;
+import com.gun3y.pagerank.utils.HtmlUtils;
 
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
@@ -20,17 +24,16 @@ public class BasicCrawler extends WebCrawler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicCrawler.class);
 
-    private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|bmp|gif|jpe?g" + "|png|tiff?|mid|mp2|mp3|mp4"
-            + "|wav|avi|mov|mpeg|ram|m4v|pdf" + "|rm|smil|wmv|swf|wma|zip|rar|gz))$");
+    private final static Pattern FILTERS = Pattern.compile(HtmlUtils.REGEX_HTML_PAGES);
 
     private MongoManager mongoManager;
 
     @Override
     public void onStart() {
-        Object customData = myController.getCustomData();
+        Object customData = this.myController.getCustomData();
 
         if (customData != null && customData instanceof MongoManager) {
-            mongoManager = (MongoManager) customData;
+            this.mongoManager = (MongoManager) customData;
         }
     }
 
@@ -60,35 +63,61 @@ public class BasicCrawler extends WebCrawler {
 
         LOGGER.info("Docid: " + docid);
         LOGGER.info("URL: " + url);
-        LOGGER.info("Domain: '" + domain + "'");
-        LOGGER.info("Sub-domain: '" + subDomain + "'");
-        LOGGER.info("Path: '" + path + "'");
-        LOGGER.info("Parent page: " + parentUrl);
-        LOGGER.info("Anchor text: " + anchor);
+        LOGGER.debug("Domain: '" + domain + "'");
+        LOGGER.debug("Sub-domain: '" + subDomain + "'");
+        LOGGER.debug("Path: '" + path + "'");
+        LOGGER.debug("Parent page: " + parentUrl);
+        LOGGER.debug("Anchor text: " + anchor);
 
         if (page.getParseData() instanceof HtmlParseData) {
             final HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
             final String text = htmlParseData.getText();
+            final String title = htmlParseData.getTitle();
             final String html = htmlParseData.getHtml();
             final Set<WebURL> links = htmlParseData.getOutgoingUrls();
 
-            LOGGER.info("Text length: " + text.length());
-            LOGGER.info("Html length: " + html.length());
-            LOGGER.info("Number of outgoing links: " + links.size());
+            LOGGER.debug("Title: " + title);
+            LOGGER.debug("Text length: " + text.length());
+            LOGGER.debug("Html length: " + html.length());
+            LOGGER.debug("Number of outgoing links: " + links.size());
 
             HtmlPage htmlPage = BeanMapper.map(page);
-            mongoManager.add(htmlPage);
+            HtmlData htmlData = htmlPage.getHtmlData();
+
+            // TODO: Mongo için "." yı "_" ile değiştir
+            Map<String, String> metaTags = htmlData.getMetaTags();
+            if (metaTags != null && !metaTags.isEmpty()) {
+                Set<String> keySet = new HashSet<String>(metaTags.keySet());
+                for (String key : keySet) {
+                    if (key.contains(".")) {
+                        LOGGER.debug("MetaTag {} is replaced", key);
+                        metaTags.put(key.replace(".", "_"), metaTags.get(key));
+                        metaTags.remove(key);
+                    }
+                }
+            }
+
+            // TODO stemmed text i taşı
+            // if (htmlData != null) {
+            // htmlData.setStemmedText(LangUtils.joinList(LangUtils.extractStemmedWords(text)));
+            // htmlData.setStemmedTitle(LangUtils.joinList(LangUtils.extractStemmedWords(title)));
+            // }
+
+            if (this.mongoManager != null) {
+                this.mongoManager.addHtmlPage(htmlPage);
+            }
         }
 
         final Header[] responseHeaders = page.getFetchResponseHeaders();
 
         if (responseHeaders != null) {
-            LOGGER.info("Response headers:");
+            LOGGER.debug("Response headers:");
             for (final Header header : responseHeaders) {
-                LOGGER.info("\t" + header.getName() + ": " + header.getValue());
+                LOGGER.debug("\t" + header.getName() + ": " + header.getValue());
             }
         }
 
         LOGGER.info("=============");
     }
+
 }

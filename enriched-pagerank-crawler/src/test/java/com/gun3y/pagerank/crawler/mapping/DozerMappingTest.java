@@ -104,7 +104,7 @@ public class DozerMappingTest {
         htmlData.setHtml(DozerMappingTest.html);
         htmlData.setMetaTags(DozerMappingTest.metaTags);
         htmlData.setOutgoingUrls(DozerMappingTest.outgoingUrls);
-        htmlData.setText(DozerMappingTest.text);
+        // htmlData.setText(DozerMappingTest.text);
         htmlData.setTitle(DozerMappingTest.title);
         return htmlData;
     }
@@ -233,7 +233,7 @@ public class DozerMappingTest {
 
         EqualsBuilder equalsBuilder = new EqualsBuilder();
         equalsBuilder.append(htmlData1.getHtml(), htmlData2.getHtml());
-        equalsBuilder.append(htmlData1.getText(), htmlData2.getText());
+        // equalsBuilder.append(htmlData1.getText(), htmlData2.getText());
         equalsBuilder.append(htmlData1.getTitle(), htmlData2.getTitle());
 
         equalsBuilder.append(true, deepEquals(htmlData1.getMetaTags(), htmlData2.getMetaTags()));

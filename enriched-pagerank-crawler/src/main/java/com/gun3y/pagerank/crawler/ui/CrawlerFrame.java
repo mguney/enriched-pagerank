@@ -34,9 +34,10 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gun3y.pagerank.crawler.BasicCrawler;
-import com.gun3y.pagerank.crawler.CrawlerCommons;
 import com.gun3y.pagerank.mongo.MongoManager;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
@@ -46,6 +47,8 @@ import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 
 public class CrawlerFrame extends JFrame {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CrawlerFrame.class);
 
     private static final long serialVersionUID = 1731132804598008409L;
 
@@ -63,7 +66,6 @@ public class CrawlerFrame extends JFrame {
     private JTextField txtSeeds;
     private JList<String> listSeeds;
 
-    private DefaultListModel<String> filterListModel;
     private DefaultListModel<String> seedListModel;
 
     private JFileChooser fc;
@@ -246,6 +248,7 @@ public class CrawlerFrame extends JFrame {
             config.setUserAgentString(this.txtUserAgent.getText());
         }
 
+        LOGGER.debug(config.toString());
         PageFetcher pageFetcher = new PageFetcher(config);
         RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
 
@@ -266,13 +269,15 @@ public class CrawlerFrame extends JFrame {
         }
 
         for (int i = 0; i < this.seedListModel.getSize(); i++) {
-            this.controller.addSeed(this.seedListModel.getElementAt(i));
+            String seed = this.seedListModel.getElementAt(i);
+            LOGGER.info("Seed {}: {}", i, seed);
+            this.controller.addSeed(seed);
         }
         int crawlerThread = 5;
         if (StringUtils.isNotBlank(this.txtCrawlerThread.getText())) {
             crawlerThread = Integer.parseInt(this.txtCrawlerThread.getText());
         }
-
+        LOGGER.info("Crawler Thread: " + crawlerThread);
         this.controller.setCustomData(this.mongoManager);
 
         this.controller.startNonBlocking(BasicCrawler.class, crawlerThread);
@@ -302,10 +307,7 @@ public class CrawlerFrame extends JFrame {
 
                 }
             });
-            this.filterListModel = new DefaultListModel<String>();
-            for (String fltr : CrawlerCommons.FILTER) {
-                this.filterListModel.addElement(fltr);
-            }
+
             this.seedListModel = new DefaultListModel<String>();
 
             this.txtSeeds = new JTextField();
