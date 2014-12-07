@@ -10,13 +10,19 @@
 		</encoder>
 	</appender>
 
+
 	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
 		<file>${LOG_HOME}/${LOG_FILE_NAME}</file>
+		<append>true</append>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_FILE_NAME}.%d{yyyy-MM-dd}.log
+			</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
 		<encoder>
 			<pattern>%date %-5level [%thread] - [%logger] - %msg%n</pattern>
 		</encoder>
 	</appender>
-
 
 	<root level="debug">
 		<appender-ref ref="STDOUT" />

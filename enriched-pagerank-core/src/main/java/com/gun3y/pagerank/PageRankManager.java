@@ -392,7 +392,7 @@ public class PageRankManager {
                 continue;
             }
             for (String key : stemmedTitles) {
-                if (stemmedText.contains(key)) {
+                if (stemmedText.contains(key.toLowerCase(Locale.ENGLISH))) {
                     GraphNode nodeFrom = this.mongoManager.getGraphNodeById(nextEnhancedHtmlPage.getPageId());
                     this.mongoManager.addGraphEdge(nodeFrom, nodeTo, LinkType.ImplicitLink);
                 }
