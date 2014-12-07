@@ -4,6 +4,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -16,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import com.gun3y.pagerank.entity.html.HtmlPage;
 import com.gun3y.pagerank.entity.html.WebUrl;
-import com.gun3y.pagerank.mongo.HtmlPageRunner;
 import com.gun3y.pagerank.mongo.MongoManager;
 import com.gun3y.pagerank.web.d3.Node;
 import com.gun3y.pagerank.web.d3.NodeLink;
@@ -33,48 +33,47 @@ public class HtmlPageVisualizer {
 
         final Map<Integer, Pair<String, Integer>> idMap = new HashMap<Integer, Pair<String, Integer>>();
 
-        mongoManager.runOnHtmlPages(new HtmlPageRunner() {
+        Iterator<HtmlPage> htmlPageIterator = mongoManager.getHtmlPageIterator();
 
-            @Override
-            public void run(HtmlPage htmlPage) {
-                WebUrl webUrl = htmlPage.getUrl();
+        while (htmlPageIterator.hasNext()) {
+            HtmlPage htmlPage = htmlPageIterator.next();
 
-                int docid = webUrl.getDocid();
-                idMap.put(docid, new MutablePair<String, Integer>(webUrl.getUrl(), webUrl.getParentDocid()));
+            WebUrl webUrl = htmlPage.getUrl();
 
-                if (!pageRanks.containsKey(docid)) {
-                    pageRanks.put(docid, new MutablePair<Set<Integer>, Set<Integer>>(new HashSet<Integer>(), new HashSet<Integer>()));
-                }
+            int docid = webUrl.getDocid();
+            idMap.put(docid, new MutablePair<String, Integer>(webUrl.getUrl(), webUrl.getParentDocid()));
 
-                Pair<Set<Integer>, Set<Integer>> values = pageRanks.get(docid);
-                Set<Integer> outgoing = values.getValue();
+            if (!pageRanks.containsKey(docid)) {
+                pageRanks.put(docid, new MutablePair<Set<Integer>, Set<Integer>>(new HashSet<Integer>(), new HashSet<Integer>()));
+            }
 
-                Set<WebUrl> outgoingUrls = htmlPage.getHtmlData().getOutgoingUrls();
-                if (outgoingUrls != null) {
-                    for (WebUrl wUrl : outgoingUrls) {
-                        if (wUrl.getDocid() > -1) {
-                            int oDocid = wUrl.getDocid();
+            Pair<Set<Integer>, Set<Integer>> values = pageRanks.get(docid);
+            Set<Integer> outgoing = values.getValue();
 
-                            idMap.put(oDocid, new MutablePair<String, Integer>(wUrl.getUrl(), wUrl.getParentDocid()));
+            Set<WebUrl> outgoingUrls = htmlPage.getHtmlData().getOutgoingUrls();
+            if (outgoingUrls != null) {
+                for (WebUrl wUrl : outgoingUrls) {
+                    if (wUrl.getDocid() > -1) {
+                        int oDocid = wUrl.getDocid();
 
-                            if (!pageRanks.containsKey(oDocid)) {
-                                pageRanks.put(oDocid, new MutablePair<Set<Integer>, Set<Integer>>(new HashSet<Integer>(),
-                                        new HashSet<Integer>()));
-                            }
+                        idMap.put(oDocid, new MutablePair<String, Integer>(wUrl.getUrl(), wUrl.getParentDocid()));
 
-                            Pair<Set<Integer>, Set<Integer>> oValues = pageRanks.get(oDocid);
-                            Set<Integer> incoming = oValues.getKey();
-                            incoming.add(docid);
-
-                            outgoing.add(oDocid);
-
+                        if (!pageRanks.containsKey(oDocid)) {
+                            pageRanks.put(oDocid, new MutablePair<Set<Integer>, Set<Integer>>(new HashSet<Integer>(),
+                                    new HashSet<Integer>()));
                         }
 
-                    }
-                }
+                        Pair<Set<Integer>, Set<Integer>> oValues = pageRanks.get(oDocid);
+                        Set<Integer> incoming = oValues.getKey();
+                        incoming.add(docid);
 
+                        outgoing.add(oDocid);
+
+                    }
+
+                }
             }
-        });
+        }
 
         List<Node> index = new ArrayList<Node>();
         for (Integer id : idMap.keySet()) {

@@ -9,7 +9,6 @@ public class HtmlData implements Serializable {
     private static final long serialVersionUID = 4197987210914288017L;
 
     private String html;
-    private String text;
     private String title;
     private Map<String, String> metaTags;
 
@@ -21,14 +20,6 @@ public class HtmlData implements Serializable {
 
     public void setHtml(String html) {
         this.html = html;
-    }
-
-    public String getText() {
-        return this.text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
     }
 
     public String getTitle() {
@@ -68,4 +59,5 @@ public class HtmlData implements Serializable {
         builder.append("\n}");
         return builder.toString();
     }
+
 }

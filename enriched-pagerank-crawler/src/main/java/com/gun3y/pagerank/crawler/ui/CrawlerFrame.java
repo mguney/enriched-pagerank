@@ -347,6 +347,7 @@ public class CrawlerFrame extends JFrame {
                                     JOptionPane.ERROR_MESSAGE);
                         }
 
+                        CrawlerFrame.this.txtSeeds.setText(StringUtils.EMPTY);
                     }
                 }
 

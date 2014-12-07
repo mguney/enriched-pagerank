@@ -11,7 +11,7 @@ public class GraphInitiator {
         final MongoManager mongoManager = new MongoManager();
         mongoManager.init();
         mongoManager.cleanWebGraph();
-        mongoManager.transformHtmlPageToWebGraph();
+        // mongoManager.transformHtmlPageToWebGraph();
 
         mongoManager.close();
     }
@@ -21,7 +21,7 @@ public class GraphInitiator {
         final MongoManager mongoManager = new MongoManager();
         mongoManager.init();
 
-        mongoManager.computePageRanks(10);
+        // mongoManager.computePageRanks(10);
 
         mongoManager.close();
     }

@@ -97,12 +97,6 @@ public class BasicCrawler extends WebCrawler {
                 }
             }
 
-            // TODO stemmed text i taşı
-            // if (htmlData != null) {
-            // htmlData.setStemmedText(LangUtils.joinList(LangUtils.extractStemmedWords(text)));
-            // htmlData.setStemmedTitle(LangUtils.joinList(LangUtils.extractStemmedWords(title)));
-            // }
-
             if (this.mongoManager != null) {
                 this.mongoManager.addHtmlPage(htmlPage);
             }
