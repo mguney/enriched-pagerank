@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,14 +12,14 @@ import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Jsoup;
 import org.jsoup.helper.StringUtil;
-import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gun3y.pagerank.common.HtmlToText;
 import com.gun3y.pagerank.common.HtmlToText.LineItem;
+import com.gun3y.pagerank.entity.graph.LinkType;
+import com.gun3y.pagerank.entity.html.EnhancedHtmlPage;
+import com.gun3y.pagerank.store.LinkTuple;
 
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
@@ -36,7 +35,7 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Triple;
 
-public class SemanticLinkAnalyzer {
+public class SemanticLinkAnalyzer implements LinkAnalyzer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SemanticLinkAnalyzer.class);
 
@@ -87,35 +86,35 @@ public class SemanticLinkAnalyzer {
 
         LineItem lineItem = new LineItem(text, map);
         // System.out.println(text);
-        List<PairWord> analyze = analyzer.analyze(Arrays.asList(lineItem));
+        List<LinkTuple> analyze = analyzer.analyze(Arrays.asList(lineItem));
         // List<PairWord> analyze = analyzer.analyze(html, baseUrl);
-        for (PairWord pairWord : analyze) {
+        for (LinkTuple pairWord : analyze) {
             // System.out.println(pairWord.first + "#" + pairWord.predicate +
             // "#" + pairWord.second);
         }
     }
 
-    public List<PairWord> analyze(String html, String baseUrl) {
-
-        if (StringUtils.isBlank(html)) {
-            return Collections.emptyList();
-        }
-
-        Document doc = Jsoup.parse(html, baseUrl);
-
-        HtmlToText formatter = new HtmlToText();
-        List<LineItem> lines = formatter.getLines(doc);
-
+    @Override
+    public List<LinkTuple> analyze(EnhancedHtmlPage ePage) {
+        List<LineItem> lines = ePage.getLines();
         return this.analyze(lines);
     }
 
-    private List<PairWord> analyze(List<LineItem> lines) {
+    @Override
+    public List<LinkTuple> analyze(EnhancedHtmlPage ePage, EnhancedHtmlPage tempPage) {
+        return this.analyze(ePage);
+    }
+
+    private List<LinkTuple> analyze(List<LineItem> lines) {
+
+        List<LinkTuple> tuples = new ArrayList<LinkTuple>();
+
         if (lines.isEmpty()) {
-            return Collections.emptyList();
+            return tuples;
         }
 
-        List<PairWord> retList = new ArrayList<PairWord>();
         for (LineItem lineItem : lines) {
+
             if (lineItem.getUrls().size() < 2) {
                 continue;
             }
@@ -128,6 +127,7 @@ public class SemanticLinkAnalyzer {
 
                 String sentenceText = sentence.get(TextAnnotation.class);
                 LOGGER.debug(sentenceText);
+
                 List<PairWord> pairs = this.extractPairs(sentenceText, lineItem.getUrls());
 
                 if (pairs.isEmpty()) {
@@ -165,14 +165,14 @@ public class SemanticLinkAnalyzer {
                     PairWord triple = this.extractSemanticTriple(semanticGraph, pairWord);
                     if (triple != null) {
                         LOGGER.info(triple.toString());
-                        retList.add(triple);
+                        tuples.add(new LinkTuple(triple.firstUrl, LinkType.SemanticLink, triple.secondUrl, triple.predicate));
                     }
 
                 }
 
             }
         }
-        return retList;
+        return tuples;
     }
 
     private class PairWord {

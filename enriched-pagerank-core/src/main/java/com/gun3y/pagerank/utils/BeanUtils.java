@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import com.gun3y.pagerank.common.HtmlToText;
 import com.gun3y.pagerank.entity.graph.GraphNode;
 import com.gun3y.pagerank.entity.html.EnhancedHtmlPage;
 import com.gun3y.pagerank.entity.html.HtmlData;
@@ -41,8 +42,11 @@ public class BeanUtils {
         String html = htmlData.getHtml();
         String title = htmlData.getTitle();
 
-        Document doc = Jsoup.parse(html);
+        Document doc = Jsoup.parse(html, url.getUrl());
         String text = doc.text();
+
+        HtmlToText formatter = new HtmlToText();
+        enhancedHtmlPage.setLines(formatter.getLines(doc));
 
         enhancedHtmlPage.setPageId(url.getDocid());
         enhancedHtmlPage.setHtml(html);

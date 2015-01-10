@@ -1,12 +1,15 @@
 package com.gun3y.pagerank.entity.html;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
+
+import com.gun3y.pagerank.common.HtmlToText.LineItem;
 
 @Entity
 public class EnhancedHtmlPage {
@@ -33,6 +36,8 @@ public class EnhancedHtmlPage {
     private String stemmedTitle;
 
     private String stemmedText;
+
+    private List<LineItem> lines;
 
     public EnhancedHtmlPage() {
         super();
@@ -117,6 +122,14 @@ public class EnhancedHtmlPage {
 
     public void setOutgoingUrls(Set<String> outgoingUrls) {
         this.outgoingUrls = outgoingUrls;
+    }
+
+    public List<LineItem> getLines() {
+        return lines;
+    }
+
+    public void setLines(List<LineItem> lines) {
+        this.lines = lines;
     }
 
 }

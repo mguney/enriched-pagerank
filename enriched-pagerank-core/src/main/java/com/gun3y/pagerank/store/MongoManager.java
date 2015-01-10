@@ -25,7 +25,7 @@ import com.gun3y.pagerank.entity.html.EnhancedHtmlPage;
 import com.gun3y.pagerank.entity.html.HtmlPage;
 import com.mongodb.MongoClient;
 
-public class MongoManager {
+public class MongoManager implements HtmlEntityManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoManager.class);
 
@@ -204,6 +204,7 @@ public class MongoManager {
         return this.ds.find(EnhancedHtmlPage.class, "pageId", docid).get();
     }
 
+    @Override
     public synchronized EnhancedHtmlPage getEnhancedHtmlPageByUrl(String url) {
         if (this.ds == null) {
             throw new IllegalArgumentException("MongoManager not initialized!");
@@ -212,6 +213,7 @@ public class MongoManager {
         return this.ds.find(EnhancedHtmlPage.class, "url", url).get();
     }
 
+    @Override
     public synchronized long getEnhancedHtmlPageCount() {
         if (this.ds == null) {
             throw new IllegalArgumentException("MongoManager not initialized!");
@@ -280,6 +282,7 @@ public class MongoManager {
         return this.ds.find(GraphNode.class).fetch();
     }
 
+    @Override
     public synchronized Iterator<EnhancedHtmlPage> getEnhancedHtmlPageIterator() {
         if (this.ds == null) {
             throw new IllegalArgumentException("MongoManager not initialized!");
