@@ -38,7 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gun3y.pagerank.crawler.BasicCrawler;
-import com.gun3y.pagerank.mongo.MongoManager;
+import com.gun3y.pagerank.store.MongoManager;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;

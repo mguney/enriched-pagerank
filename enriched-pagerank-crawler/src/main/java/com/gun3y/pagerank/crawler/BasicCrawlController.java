@@ -1,6 +1,6 @@
 package com.gun3y.pagerank.crawler;
 
-import com.gun3y.pagerank.mongo.MongoManager;
+import com.gun3y.pagerank.store.MongoManager;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;

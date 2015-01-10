@@ -24,7 +24,9 @@ import com.gun3y.pagerank.entity.graph.GraphNode;
 import com.gun3y.pagerank.entity.graph.LinkType;
 import com.gun3y.pagerank.entity.html.EnhancedHtmlPage;
 import com.gun3y.pagerank.entity.html.HtmlPage;
-import com.gun3y.pagerank.mongo.MongoManager;
+import com.gun3y.pagerank.helper.SparqlHelper;
+import com.gun3y.pagerank.store.MongoManager;
+import com.gun3y.pagerank.store.VirtuosoManager;
 import com.gun3y.pagerank.utils.BeanUtils;
 import com.gun3y.pagerank.utils.LangUtils;
 
@@ -37,9 +39,12 @@ public class PageRankManager {
 
     private MongoManager mongoManager;
 
-    public PageRankManager(MongoManager mongoManager) {
+    private VirtuosoManager virtuosoManager;
+
+    public PageRankManager(MongoManager mongoManager, VirtuosoManager virtuosoManager) {
         super();
         this.mongoManager = mongoManager;
+        this.virtuosoManager = virtuosoManager;
     }
 
     public PageRankManager() {
@@ -140,7 +145,10 @@ public class PageRankManager {
     public static void main(String[] args) {
         MongoManager mongoManager = new MongoManager();
         mongoManager.init();
-        PageRankManager pageRankManager = new PageRankManager(mongoManager);
+
+        VirtuosoManager virtuosoManager = new VirtuosoManager(SparqlHelper.ONTOLOGY);
+
+        PageRankManager pageRankManager = new PageRankManager(mongoManager, virtuosoManager);
         pageRankManager.transform();
 
     }
@@ -280,9 +288,9 @@ public class PageRankManager {
         while (enhancedHtmlPageIterator.hasNext()) {
             EnhancedHtmlPage enhancedHtmlPage = enhancedHtmlPageIterator.next();
             GraphNode graphNode = BeanUtils.newGraphNode(enhancedHtmlPage);
-            this.mongoManager.addGraphNode(graphNode);
+            this.virtuosoManager.addGraphNode(graphNode);
         }
-        long nodeCount = this.mongoManager.getGraphNodeCount();
+        long nodeCount = this.virtuosoManager.getGraphNodeCount();
         timer.stop();
         LOGGER.info("GraphNodes({}) haven added into DB in {} ms", nodeCount, timer.getTime());
 
@@ -291,9 +299,9 @@ public class PageRankManager {
     private void transformInitialPageRanks() {
         StopWatch rankTimer = new StopWatch();
         rankTimer.start();
-        long totalCount = this.mongoManager.getGraphNodeCount();
+        long totalCount = this.virtuosoManager.getGraphNodeCount();
         double basePR = 1 / totalCount;
-        this.mongoManager.updateGraphNode(basePR);
+        this.virtuosoManager.updateGraphNode(basePR);
         rankTimer.stop();
         LOGGER.info("Initial PageRanks({}) have been applied  in {} ms", basePR, rankTimer.getTime());
 

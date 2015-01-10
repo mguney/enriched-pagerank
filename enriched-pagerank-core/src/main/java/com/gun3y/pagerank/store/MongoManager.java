@@ -1,4 +1,4 @@
-package com.gun3y.pagerank.mongo;
+package com.gun3y.pagerank.store;
 
 import java.net.UnknownHostException;
 import java.util.Iterator;

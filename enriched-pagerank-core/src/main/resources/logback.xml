@@ -1,16 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-
 	<property name="LOG_HOME" value="logs" />
 	<property name="LOG_FILE_NAME" value="/enriched-pagerank-core.log" />
-
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
 			<pattern>%date{HH:mm:ss} %-5level [%thread] - [%logger{0}]- %msg%n
 			</pattern>
 		</encoder>
 	</appender>
-
-
+	<appender name="FILE_DETAIL_ANALYZER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_HOME}/link-analyzer-detail.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover -->
+			<fileNamePattern>link-analyzer-detail.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<!-- keep 30 days' worth of history -->
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%msg%n</pattern>
+		</encoder>
+	</appender>
+	<appender name="FILE_ANALYZER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_HOME}/link-analyzer.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover -->
+			<fileNamePattern>link-analyzer.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<!-- keep 30 days' worth of history -->
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<level>INFO</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>
+		<encoder>
+			<pattern>%msg%n</pattern>
+		</encoder>
+	</appender>
 	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
 		<file>${LOG_HOME}/${LOG_FILE_NAME}</file>
 		<append>true</append>
@@ -23,9 +49,11 @@
 			<pattern>%date %-5level [%thread] - [%logger] - %msg%n</pattern>
 		</encoder>
 	</appender>
-
-	<root level="debug">
+	<logger name="com.gun3y.pagerank.analyzer" level="DEBUG" additivity="false">
+		<appender-ref ref="FILE_DETAIL_ANALYZER" />
+		<appender-ref ref="FILE_ANALYZER" />
+	</logger>
+	<root level="DEBUG">
 		<appender-ref ref="STDOUT" />
-		<appender-ref ref="FILE" />
 	</root>
 </configuration>

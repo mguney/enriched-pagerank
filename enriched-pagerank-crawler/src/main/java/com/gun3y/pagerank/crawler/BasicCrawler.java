@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.gun3y.pagerank.crawler.mapping.BeanMapper;
 import com.gun3y.pagerank.entity.html.HtmlData;
 import com.gun3y.pagerank.entity.html.HtmlPage;
-import com.gun3y.pagerank.mongo.MongoManager;
+import com.gun3y.pagerank.store.MongoManager;
 import com.gun3y.pagerank.utils.HtmlUtils;
 
 import edu.uci.ics.crawler4j.crawler.Page;

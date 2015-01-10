@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import com.gun3y.pagerank.entity.html.HtmlPage;
 import com.gun3y.pagerank.entity.html.WebUrl;
-import com.gun3y.pagerank.mongo.MongoManager;
+import com.gun3y.pagerank.store.MongoManager;
 import com.gun3y.pagerank.web.d3.Node;
 import com.gun3y.pagerank.web.d3.NodeLink;
 import com.gun3y.pagerank.web.d3.Stat;
