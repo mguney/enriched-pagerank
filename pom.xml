@@ -9,6 +9,7 @@
 		<crawler4j.version>4.1-SNAPSHOT</crawler4j.version>
 		<morphia.version>0.108</morphia.version>
 		<lucene.version>4.10.2</lucene.version>
+		<stanford.version>3.5.0</stanford.version>
 	</properties>
 	<modules>
 		<module>enriched-pagerank-crawler</module>
@@ -116,12 +117,12 @@
 			<dependency>
 				<groupId>edu.stanford.nlp</groupId>
 				<artifactId>stanford-corenlp</artifactId>
-				<version>3.5.0</version>
+				<version>${stanford.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>edu.stanford.nlp</groupId>
 				<artifactId>stanford-corenlp</artifactId>
-				<version>3.5.0</version>
+				<version>${stanford.version}</version>
 				<classifier>models</classifier>
 			</dependency>
 			<dependency>
