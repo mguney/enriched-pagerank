@@ -55,6 +55,8 @@ public class LinkAnalysisManager {
         return this.linkStorage;
     }
 
+
+
     public void analyze() {
         LOGGER.info("Link Analysis has started");
 
@@ -81,12 +83,7 @@ public class LinkAnalysisManager {
             }
         }
 
-        //
-        // this.transformGraphNodes();
-        //
-        // this.transformInitialPageRanks();
-        //
-        // this.transformLinks();
+
 
         LOGGER.info("Link Analysis has ended");
     }

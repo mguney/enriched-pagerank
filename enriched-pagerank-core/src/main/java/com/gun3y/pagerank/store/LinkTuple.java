@@ -1,6 +1,8 @@
 package com.gun3y.pagerank.store;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.gun3y.pagerank.entity.graph.LinkType;
 
@@ -29,6 +31,29 @@ public class LinkTuple {
 
     public boolean validate() {
         return StringUtils.isNotBlank(this.from) && StringUtils.isNotBlank(this.to) && this.linkType != null;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s:%s@%s:%s", this.from, this.to, this.linkType, this.rel);
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(this.from).append(this.to).append(this.rel).append(this.linkType).toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+
+        if (obj instanceof LinkTuple) {
+            final LinkTuple other = (LinkTuple) obj;
+            return new EqualsBuilder().append(this.from, other.from).append(this.to, other.to).append(this.rel, other.rel)
+                    .append(this.linkType, other.linkType).isEquals();
+        }
+        else {
+            return false;
+        }
     }
 
 }

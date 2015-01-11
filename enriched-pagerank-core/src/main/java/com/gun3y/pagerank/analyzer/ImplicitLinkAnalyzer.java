@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -44,8 +43,10 @@ public class ImplicitLinkAnalyzer implements LinkAnalyzer {
             return tuples;
         }
         for (String key : stemmedTitles) {
-            if (stemmedText.contains(key.toLowerCase(Locale.ENGLISH))) {
-                tuples.add(new LinkTuple(tempPage.getUrl(), LinkType.ImplicitLink, ePage.getUrl()));
+            int countMatches = StringUtils.countMatches(stemmedText, key);
+            while (countMatches > 0) {
+                tuples.add(new LinkTuple(tempPage.getUrl(), LinkType.ImplicitLink, ePage.getUrl(), key));
+                countMatches--;
             }
         }
 

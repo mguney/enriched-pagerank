@@ -74,55 +74,7 @@ public class MongoManager implements HtmlEntityManager {
         }
     }
 
-    // public void mp() throws IOException {
-    // String mapFunction = FileUtils.readFileToString(new
-    // File(MongoManager.class.getClassLoader().getResource("map.js").getPath()));
-    // String reduceFunction = FileUtils
-    // .readFileToString(new
-    // File(MongoManager.class.getClassLoader().getResource("reduce.js").getPath()));
-    // MapReduceCommand mapReduceCommand = new
-    // MapReduceCommand(this.ds.getCollection(GraphNode.class), mapFunction,
-    // reduceFunction,
-    // "TEST", OutputType.INLINE, null);
-    //
-    // MapreduceResults<GraphNode> mapReduce =
-    // this.ds.mapReduce(MapreduceType.INLINE,
-    // this.ds.createQuery(GraphNode.class),
-    // GraphNode.class, mapReduceCommand);
-    //
-    // Iterator<GraphNode> inlineResults = mapReduce.getInlineResults();
-    // while (inlineResults.hasNext()) {
-    // GraphNode next = inlineResults.next();
-    // System.out.println(next.getPageId() + " " + next.getPageRank());
-    // }
-    // }
 
-    // private GraphNode addGraphNodeByHtmlPage(HtmlPage htmlPage) {
-    // GraphNode graphNode = MongoUtils.newGraphNode(htmlPage);
-    // Key<GraphNode> grapNodeKey = this.ds.save(graphNode);
-    // LOGGER.info("GraphNode Added: ID:{}\t URL:{}", graphNode.getPageId(),
-    // graphNode.getUrl());
-    // return this.ds.getByKey(GraphNode.class, grapNodeKey);
-    // }
-
-    // public synchronized void computePageRanks(int numOfIteration) {
-    // if (this.ds == null) {
-    // return;
-    // }
-    //
-    // StopWatch timer = new StopWatch();
-    // timer.start();
-    //
-    // int count = 0;
-    // while (numOfIteration > 0) {
-    // numOfIteration--;
-    // LOGGER.info("{} iteration start", ++count);
-    // this.iteratePageRank();
-    // }
-    // timer.stop();
-    // LOGGER.info("PageRank Computing has been finished in {} ms",
-    // timer.getTime());
-    // }
 
     public synchronized void cleanWebGraph() {
         if (this.ds == null) {

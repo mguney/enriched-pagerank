@@ -19,10 +19,6 @@ import com.gun3y.pagerank.utils.BeanUtils;
 public class PageRankManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(PageRankManager.class);
 
-    private static final String LANG_EN = "en";
-
-    private static final String HTML_HREF = "href";
-
     private MongoManager mongoManager;
 
     private VirtuosoManager virtuosoManager;
