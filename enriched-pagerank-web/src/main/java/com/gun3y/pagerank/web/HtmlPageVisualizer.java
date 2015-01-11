@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import com.gun3y.pagerank.entity.html.HtmlPage;
 import com.gun3y.pagerank.entity.html.WebUrl;
-import com.gun3y.pagerank.store.MongoManager;
+import com.gun3y.pagerank.store.MongoHtmlPageDao;
 import com.gun3y.pagerank.web.d3.Node;
 import com.gun3y.pagerank.web.d3.NodeLink;
 import com.gun3y.pagerank.web.d3.Stat;
@@ -27,7 +27,7 @@ public class HtmlPageVisualizer {
     private static final Logger LOGGER = LoggerFactory.getLogger(HtmlPageVisualizer.class);
 
     public static void main(String[] args) throws UnknownHostException {
-        MongoManager mongoManager = new MongoManager();
+        MongoHtmlPageDao mongoManager = new MongoHtmlPageDao();
         mongoManager.init();
         final Map<Integer, Pair<Set<Integer>, Set<Integer>>> pageRanks = new HashMap<Integer, Pair<Set<Integer>, Set<Integer>>>();
 

@@ -20,7 +20,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gun3y.pagerank.store.MongoManager;
+import com.gun3y.pagerank.store.MongoHtmlPageDao;
 
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 
@@ -37,7 +37,7 @@ public class LogViewer extends JDialog {
 
     private CrawlController controller;
 
-    private MongoManager mongoManager;
+    private MongoHtmlPageDao mongoManager;
 
     private Thread statRunner = new Thread(new Runnable() {
 
@@ -89,7 +89,7 @@ public class LogViewer extends JDialog {
      *
      * @param controller
      */
-    public LogViewer(CrawlerFrame crawlerFrame, CrawlController controller, MongoManager mongoManager) {
+    public LogViewer(CrawlerFrame crawlerFrame, CrawlController controller, MongoHtmlPageDao mongoManager) {
         super(crawlerFrame);
         this.controller = controller;
         this.mongoManager = mongoManager;

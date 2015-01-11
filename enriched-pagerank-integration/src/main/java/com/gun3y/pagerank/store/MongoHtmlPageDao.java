@@ -3,7 +3,6 @@ package com.gun3y.pagerank.store;
 import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -18,16 +17,16 @@ import org.mongodb.morphia.query.UpdateOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gun3y.pagerank.dao.HtmlPageDao;
+import com.gun3y.pagerank.entity.LinkType;
 import com.gun3y.pagerank.entity.graph.GraphEdge;
 import com.gun3y.pagerank.entity.graph.GraphNode;
-import com.gun3y.pagerank.entity.graph.LinkType;
-import com.gun3y.pagerank.entity.html.EnhancedHtmlPage;
 import com.gun3y.pagerank.entity.html.HtmlPage;
 import com.mongodb.MongoClient;
 
-public class MongoManager implements HtmlEntityManager {
+public class MongoHtmlPageDao implements HtmlPageDao<HtmlPage> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MongoManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MongoHtmlPageDao.class);
 
     private MongoClient mongoClient;
 
@@ -37,11 +36,11 @@ public class MongoManager implements HtmlEntityManager {
 
     private String dbHost = "localhost";
 
-    public MongoManager() {
+    public MongoHtmlPageDao() {
         super();
     }
 
-    public MongoManager(String host, String db) {
+    public MongoHtmlPageDao(String host, String db) {
         super();
         this.dbHost = host;
         this.dbName = db;
@@ -67,14 +66,13 @@ public class MongoManager implements HtmlEntityManager {
         morphia.map(HtmlPage.class);
     }
 
+    @Override
     @PreDestroy
     public void close() {
         if (this.mongoClient != null) {
             this.mongoClient.close();
         }
     }
-
-
 
     public synchronized void cleanWebGraph() {
         if (this.ds == null) {
@@ -84,6 +82,7 @@ public class MongoManager implements HtmlEntityManager {
         this.ds.getCollection(GraphEdge.class).drop();
     }
 
+    @Override
     public synchronized void addHtmlPage(HtmlPage htmlPage) {
         if (this.ds == null || htmlPage == null) {
             return;
@@ -100,15 +99,6 @@ public class MongoManager implements HtmlEntityManager {
 
         this.ds.save(graphNode);
         LOGGER.info("GraphNode Added: ID:{} URL:{}", graphNode.getPageId(), graphNode.getUrl());
-    }
-
-    public synchronized void addEnhancedHtmlPage(EnhancedHtmlPage enhancedHtmlPage) {
-        if (this.ds == null || enhancedHtmlPage == null) {
-            return;
-        }
-
-        this.ds.save(enhancedHtmlPage);
-        LOGGER.info("EnhancedHtmlPage Added: ID:{} URL:{}", enhancedHtmlPage.getPageId(), enhancedHtmlPage.getUrl());
     }
 
     public synchronized void addGraphEdge(GraphNode nodeFrom, GraphNode nodeTo, LinkType linkType) {
@@ -148,32 +138,6 @@ public class MongoManager implements HtmlEntityManager {
         return this.ds.find(GraphNode.class, "url", url).get();
     }
 
-    public synchronized EnhancedHtmlPage getEnhancedHtmlPageById(int docid) {
-        if (this.ds == null) {
-            throw new IllegalArgumentException("MongoManager not initialized!");
-        }
-
-        return this.ds.find(EnhancedHtmlPage.class, "pageId", docid).get();
-    }
-
-    @Override
-    public synchronized EnhancedHtmlPage getEnhancedHtmlPageByUrl(String url) {
-        if (this.ds == null) {
-            throw new IllegalArgumentException("MongoManager not initialized!");
-        }
-
-        return this.ds.find(EnhancedHtmlPage.class, "url", url).get();
-    }
-
-    @Override
-    public synchronized long getEnhancedHtmlPageCount() {
-        if (this.ds == null) {
-            throw new IllegalArgumentException("MongoManager not initialized!");
-        }
-
-        return this.ds.createQuery(EnhancedHtmlPage.class).countAll();
-    }
-
     public synchronized long getGraphNodeCount() {
         if (this.ds == null) {
             throw new IllegalArgumentException("MongoManager not initialized!");
@@ -182,12 +146,13 @@ public class MongoManager implements HtmlEntityManager {
         return this.ds.createQuery(GraphNode.class).countAll();
     }
 
-    public synchronized long getHtmlPageCount() {
+    @Override
+    public synchronized int getHtmlPageCount() {
         if (this.ds == null) {
             throw new IllegalArgumentException("MongoManager not initialized!");
         }
 
-        return this.ds.createQuery(HtmlPage.class).countAll();
+        return (int) this.ds.createQuery(HtmlPage.class).countAll();
     }
 
     public synchronized long getEdgeCount() {
@@ -218,6 +183,7 @@ public class MongoManager implements HtmlEntityManager {
         return incExQuery.asKeyList();
     }
 
+    @Override
     public synchronized Iterator<HtmlPage> getHtmlPageIterator() {
         if (this.ds == null) {
             throw new IllegalArgumentException("MongoManager not initialized!");
@@ -232,15 +198,6 @@ public class MongoManager implements HtmlEntityManager {
         }
 
         return this.ds.find(GraphNode.class).fetch();
-    }
-
-    @Override
-    public synchronized Iterator<EnhancedHtmlPage> getEnhancedHtmlPageIterator() {
-        if (this.ds == null) {
-            throw new IllegalArgumentException("MongoManager not initialized!");
-        }
-
-        return this.ds.find(EnhancedHtmlPage.class).fetch();
     }
 
     public synchronized void updateGraphNode(GraphNode graphNode, long outExCount, long outImpCount, long outSemCount,
@@ -279,14 +236,15 @@ public class MongoManager implements HtmlEntityManager {
 
     }
 
-    public void updateEnhancedHtmlPage(EnhancedHtmlPage enhancedHtmlPage, Set<String> stemmedAnchorTitles) {
-        if (this.ds == null) {
-            throw new IllegalArgumentException("MongoManager not initialized!");
-        }
-        this.ds.update(enhancedHtmlPage,
-                this.ds.createUpdateOperations(EnhancedHtmlPage.class).set("stemmedAnchorTitles", stemmedAnchorTitles));
+    @Override
+    public HtmlPage getHtmlPageByUrl(String url) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-        LOGGER.info("EnhancedHtmlPage Updated for Anchor Titles: URL:{}", enhancedHtmlPage.getUrl());
+    @Override
+    public void updateHtmlPage(String url, HtmlPage page) {
+        // TODO Auto-generated method stub
 
     }
 

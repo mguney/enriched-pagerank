@@ -8,6 +8,8 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.Reference;
 
+import com.gun3y.pagerank.entity.LinkType;
+
 @Entity
 public class GraphEdge implements Serializable {
 

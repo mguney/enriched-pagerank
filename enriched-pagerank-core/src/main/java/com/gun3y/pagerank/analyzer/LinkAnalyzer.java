@@ -2,8 +2,8 @@ package com.gun3y.pagerank.analyzer;
 
 import java.util.List;
 
-import com.gun3y.pagerank.entity.html.EnhancedHtmlPage;
-import com.gun3y.pagerank.store.LinkTuple;
+import com.gun3y.pagerank.dao.LinkTuple;
+import com.gun3y.pagerank.entity.EnhancedHtmlPage;
 
 
 public interface LinkAnalyzer {

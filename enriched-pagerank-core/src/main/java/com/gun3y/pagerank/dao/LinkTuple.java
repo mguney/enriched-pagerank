@@ -1,12 +1,16 @@
-package com.gun3y.pagerank.store;
+package com.gun3y.pagerank.dao;
+
+import java.io.Serializable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.gun3y.pagerank.entity.graph.LinkType;
+import com.gun3y.pagerank.entity.LinkType;
 
-public class LinkTuple {
+public class LinkTuple implements Serializable {
+
+    private static final long serialVersionUID = -3980877700782161276L;
 
     String from;
 
@@ -35,7 +39,7 @@ public class LinkTuple {
 
     @Override
     public String toString() {
-        return String.format("%s:%s@%s:%s", this.from, this.to, this.linkType, this.rel);
+        return String.format("%s\t%s\t%s\t%s", this.from, this.to, this.linkType, this.rel);
     }
 
     @Override

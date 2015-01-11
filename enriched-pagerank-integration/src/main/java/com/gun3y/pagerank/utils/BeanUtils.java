@@ -8,8 +8,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import com.gun3y.pagerank.common.HtmlToText;
+import com.gun3y.pagerank.entity.EnhancedHtmlPage;
 import com.gun3y.pagerank.entity.graph.GraphNode;
-import com.gun3y.pagerank.entity.html.EnhancedHtmlPage;
 import com.gun3y.pagerank.entity.html.HtmlData;
 import com.gun3y.pagerank.entity.html.HtmlPage;
 import com.gun3y.pagerank.entity.html.WebUrl;

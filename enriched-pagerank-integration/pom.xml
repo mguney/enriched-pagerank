@@ -5,28 +5,28 @@
 		<artifactId>enriched-pagerank</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>enriched-pagerank-crawler</artifactId>
+	<artifactId>enriched-pagerank-integration</artifactId>
 	<dependencies>
 		<dependency>
-			<groupId>edu.uci.ics</groupId>
-			<artifactId>crawler4j</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>com.gun3y</groupId>
-			<artifactId>enriched-pagerank-integration</artifactId>
+			<artifactId>enriched-pagerank-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
+			<groupId>org.mongodb.morphia</groupId>
+			<artifactId>morphia</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
+			<groupId>virtuoso</groupId>
+			<artifactId>virtjdbc</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.dozer</groupId>
-			<artifactId>dozer</artifactId>
+			<groupId>virtuoso</groupId>
+			<artifactId>virtjena</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-arq</artifactId>
 		</dependency>
 	</dependencies>
 </project>

@@ -1,6 +1,6 @@
 package com.gun3y.pagerank.crawler;
 
-import com.gun3y.pagerank.store.MongoManager;
+import com.gun3y.pagerank.store.MongoHtmlPageDao;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
@@ -84,7 +84,7 @@ public class BasicCrawlController {
         controller.addSeed("http://www.ics.uci.edu/~lopes/");
         controller.addSeed("http://www.ics.uci.edu/~welling/");
 
-        MongoManager mongoManager = new MongoManager();
+        MongoHtmlPageDao mongoManager = new MongoHtmlPageDao();
         mongoManager.init();
 
         controller.setCustomData(mongoManager);

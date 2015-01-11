@@ -38,7 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gun3y.pagerank.crawler.BasicCrawler;
-import com.gun3y.pagerank.store.MongoManager;
+import com.gun3y.pagerank.store.MongoHtmlPageDao;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
@@ -89,7 +89,7 @@ public class CrawlerFrame extends JFrame {
 
     private JTextField txtUserAgent;
 
-    private MongoManager mongoManager;
+    private MongoHtmlPageDao mongoManager;
 
     private CrawlController controller;
 
@@ -253,7 +253,7 @@ public class CrawlerFrame extends JFrame {
         RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
 
         RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
-        this.mongoManager = new MongoManager(dbHost, dbName);
+        this.mongoManager = new MongoHtmlPageDao(dbHost, dbName);
 
         try {
             this.controller = new CrawlController(config, pageFetcher, robotstxtServer);

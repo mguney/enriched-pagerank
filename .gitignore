@@ -9,6 +9,8 @@ target
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
+data/
+
 # Package Files #
 *.jar
 *.war
@@ -51,7 +53,7 @@ $RECYCLE.BIN/
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
 
 # Thumbnails
 ._*

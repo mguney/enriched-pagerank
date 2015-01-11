@@ -8,22 +8,22 @@ import org.mongodb.morphia.Key;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gun3y.pagerank.entity.EnhancedHtmlPage;
+import com.gun3y.pagerank.entity.LinkType;
 import com.gun3y.pagerank.entity.graph.GraphEdge;
 import com.gun3y.pagerank.entity.graph.GraphNode;
-import com.gun3y.pagerank.entity.graph.LinkType;
-import com.gun3y.pagerank.entity.html.EnhancedHtmlPage;
-import com.gun3y.pagerank.store.MongoManager;
+import com.gun3y.pagerank.store.MongoHtmlPageDao;
 import com.gun3y.pagerank.store.VirtuosoManager;
 import com.gun3y.pagerank.utils.BeanUtils;
 
 public class PageRankManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(PageRankManager.class);
 
-    private MongoManager mongoManager;
+    private MongoHtmlPageDao mongoManager;
 
     private VirtuosoManager virtuosoManager;
 
-    public PageRankManager(MongoManager mongoManager, VirtuosoManager virtuosoManager) {
+    public PageRankManager(MongoHtmlPageDao mongoManager, VirtuosoManager virtuosoManager) {
         super();
         this.mongoManager = mongoManager;
         this.virtuosoManager = virtuosoManager;
@@ -31,7 +31,7 @@ public class PageRankManager {
 
     public PageRankManager() {
         super();
-        this.mongoManager = new MongoManager();
+        this.mongoManager = new MongoHtmlPageDao();
         this.mongoManager.init();
     }
 
@@ -141,7 +141,7 @@ public class PageRankManager {
 
         StopWatch timer = new StopWatch();
         timer.start();
-        Iterator<EnhancedHtmlPage> enhancedHtmlPageIterator = this.mongoManager.getEnhancedHtmlPageIterator();
+        Iterator<EnhancedHtmlPage> enhancedHtmlPageIterator = null;// this.mongoManager.getEnhancedHtmlPageIterator();
         while (enhancedHtmlPageIterator.hasNext()) {
             EnhancedHtmlPage enhancedHtmlPage = enhancedHtmlPageIterator.next();
             GraphNode graphNode = BeanUtils.newGraphNode(enhancedHtmlPage);
@@ -195,11 +195,11 @@ public class PageRankManager {
         LOGGER.info("GraphStats have been computed in {} ms", timer.getTime());
     }
 
-    public MongoManager getMongoManager() {
+    public MongoHtmlPageDao getMongoManager() {
         return this.mongoManager;
     }
 
-    public void setMongoManager(MongoManager mongoManager) {
+    public void setMongoManager(MongoHtmlPageDao mongoManager) {
         this.mongoManager = mongoManager;
     }
 

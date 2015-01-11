@@ -3,7 +3,6 @@ package com.gun3y.pagerank.common;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Stack;
 
@@ -17,6 +16,8 @@ import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.NodeTraversor;
 import org.jsoup.select.NodeVisitor;
+
+import com.gun3y.pagerank.utils.HtmlUtils;
 
 public class HtmlToText {
 
@@ -40,31 +41,14 @@ public class HtmlToText {
         return formatter.lines;
     }
 
-    public static class LineItem {
-        Map<String, String> urls = new HashMap<String, String>();
-
-        String line;
-
-        public Map<String, String> getUrls() {
-            return this.urls;
+    public String getText(List<LineItem> lines) {
+        StringBuilder builder = new StringBuilder();
+        if (lines != null) {
+            for (LineItem lineItem : lines) {
+                builder.append(lineItem.line).append("\n");
+            }
         }
-
-        public void setUrls(Map<String, String> urls) {
-            this.urls = urls;
-        }
-
-        public String getLine() {
-            return this.line;
-        }
-
-        public void setLine(String line) {
-            this.line = line;
-        }
-
-        public LineItem(String text, Map<String, String> map) {
-            this.line = text;
-            this.urls = map;
-        }
+        return builder.toString();
     }
 
     // the formatting rules, implemented in a breadth-first DOM traverse
@@ -146,11 +130,7 @@ public class HtmlToText {
 
             String absUrl = node.absUrl("href");
 
-            if (StringUtils.isNotBlank(absUrl) && !absUrl.startsWith("#") && !absUrl.toLowerCase(Locale.ENGLISH).startsWith("javascript:")) {
-                return true;
-            }
-
-            return false;
+            return HtmlUtils.checkUrl(absUrl);
         }
 
         //

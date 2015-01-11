@@ -12,14 +12,17 @@ import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Jsoup;
 import org.jsoup.helper.StringUtil;
+import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gun3y.pagerank.common.HtmlToText.LineItem;
-import com.gun3y.pagerank.entity.graph.LinkType;
-import com.gun3y.pagerank.entity.html.EnhancedHtmlPage;
-import com.gun3y.pagerank.store.LinkTuple;
+import com.gun3y.pagerank.common.HtmlToText;
+import com.gun3y.pagerank.common.LineItem;
+import com.gun3y.pagerank.dao.LinkTuple;
+import com.gun3y.pagerank.entity.EnhancedHtmlPage;
+import com.gun3y.pagerank.entity.LinkType;
 
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
@@ -84,13 +87,16 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
         // map.put("Ethnic groups", "ad");
         // map.put("2011", "ad2");
 
+        Document doc = Jsoup.parse(html, baseUrl);
+        HtmlToText formatter = new HtmlToText();
+        List<LineItem> lines = formatter.getLines(doc);
+
         LineItem lineItem = new LineItem(text, map);
         // System.out.println(text);
         List<LinkTuple> analyze = analyzer.analyze(Arrays.asList(lineItem));
         // List<PairWord> analyze = analyzer.analyze(html, baseUrl);
-        for (LinkTuple pairWord : analyze) {
-            // System.out.println(pairWord.first + "#" + pairWord.predicate +
-            // "#" + pairWord.second);
+        for (LinkTuple linkTuple : analyze) {
+            System.out.println(linkTuple);
         }
     }
 
@@ -164,7 +170,6 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
 
                     PairWord triple = this.extractSemanticTriple(semanticGraph, pairWord);
                     if (triple != null) {
-                        LOGGER.info(triple.toString());
                         tuples.add(new LinkTuple(triple.firstUrl, LinkType.SemanticLink, triple.secondUrl, triple.predicate));
                     }
 

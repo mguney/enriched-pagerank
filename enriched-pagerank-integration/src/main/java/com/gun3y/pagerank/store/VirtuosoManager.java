@@ -12,8 +12,8 @@ import virtuoso.jena.driver.VirtGraph;
 import virtuoso.jena.driver.VirtuosoQueryExecution;
 import virtuoso.jena.driver.VirtuosoQueryExecutionFactory;
 
+import com.gun3y.pagerank.entity.LinkType;
 import com.gun3y.pagerank.entity.graph.GraphNode;
-import com.gun3y.pagerank.entity.graph.LinkType;
 import com.gun3y.pagerank.helper.SparqlHelper;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;

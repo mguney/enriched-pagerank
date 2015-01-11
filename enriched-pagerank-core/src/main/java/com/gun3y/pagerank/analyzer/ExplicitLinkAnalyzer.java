@@ -6,9 +6,9 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.gun3y.pagerank.entity.graph.LinkType;
-import com.gun3y.pagerank.entity.html.EnhancedHtmlPage;
-import com.gun3y.pagerank.store.LinkTuple;
+import com.gun3y.pagerank.dao.LinkTuple;
+import com.gun3y.pagerank.entity.EnhancedHtmlPage;
+import com.gun3y.pagerank.entity.LinkType;
 
 public class ExplicitLinkAnalyzer implements LinkAnalyzer {
 

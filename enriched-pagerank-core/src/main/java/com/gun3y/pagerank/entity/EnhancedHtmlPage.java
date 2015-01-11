@@ -1,26 +1,18 @@
-package com.gun3y.pagerank.entity.html;
+package com.gun3y.pagerank.entity;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.bson.types.ObjectId;
-import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.Indexed;
+import com.gun3y.pagerank.common.LineItem;
 
-import com.gun3y.pagerank.common.HtmlToText.LineItem;
+public class EnhancedHtmlPage implements Serializable {
 
-@Entity
-public class EnhancedHtmlPage {
+    private static final long serialVersionUID = -8270823792664046613L;
 
-    @Id
-    private ObjectId id;
-
-    @Indexed
     private String url;
 
-    @Indexed
     private int pageId;
 
     private String html;
@@ -42,14 +34,6 @@ public class EnhancedHtmlPage {
     public EnhancedHtmlPage() {
         super();
         this.stemmedAnchorTitles = new HashSet<String>();
-    }
-
-    public ObjectId getId() {
-        return this.id;
-    }
-
-    public void setId(ObjectId id) {
-        this.id = id;
     }
 
     public String getUrl() {
@@ -125,7 +109,7 @@ public class EnhancedHtmlPage {
     }
 
     public List<LineItem> getLines() {
-        return lines;
+        return this.lines;
     }
 
     public void setLines(List<LineItem> lines) {

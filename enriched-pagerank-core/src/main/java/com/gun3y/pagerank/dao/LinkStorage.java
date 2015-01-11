@@ -1,4 +1,4 @@
-package com.gun3y.pagerank.store;
+package com.gun3y.pagerank.dao;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.gun3y.pagerank.entity.graph.LinkType;
+import com.gun3y.pagerank.entity.LinkType;
 
 public class LinkStorage {
 
@@ -21,6 +21,18 @@ public class LinkStorage {
     private List<LinkTuple> implicitLinks = new LinkedList<LinkTuple>();
 
     private List<LinkTuple> semanticLinks = new LinkedList<LinkTuple>();
+
+    public List<LinkTuple> getExplicitLinks() {
+        return this.explicitLinks;
+    }
+
+    public List<LinkTuple> getImplicitLinks() {
+        return this.implicitLinks;
+    }
+
+    public List<LinkTuple> getSemanticLinks() {
+        return this.semanticLinks;
+    }
 
     public void reduceLinks(int minOccurs) {
         this.reduceLinks(this.implicitLinks, minOccurs);

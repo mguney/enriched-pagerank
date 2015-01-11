@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.gun3y.pagerank.entity.LinkType;
 import com.gun3y.pagerank.entity.graph.GraphNode;
-import com.gun3y.pagerank.entity.graph.LinkType;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
