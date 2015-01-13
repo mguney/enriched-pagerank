@@ -1,6 +1,7 @@
 package com.gun3y.pagerank;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,16 +45,46 @@ public class MainApp {
 
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         Environment env = DBUtils.newEnvironment(DB_PATH);
         LOGGER.info("New Environment has been created");
 
         EnhancedHtmlPageDao enhancedHtmlPageDao = new EnhancedHtmlPageDao(env);
         WebLinkDao webLinkDao = new WebLinkDao(env);
 
+        // StopWatch stopWatch = new StopWatch();
+        // stopWatch.start();
+        // // System.out.println(webLinkDao.getLinkTupleCount());
+        // // System.out.println(webLinkDao.getLinkTupleIterator());
+        // webLinkDao.addLinkTuple(new LinkTuple("asd", LinkType.ExplicitLink,
+        // "asd"));
+        // stopWatch.stop();
+        // System.out.println(stopWatch.getTime());
+
         LinkAnalysisManager analysisManager = new LinkAnalysisManager(enhancedHtmlPageDao, webLinkDao);
-        System.out.println(enhancedHtmlPageDao.getHtmlPageCount());
         analysisManager.analyze();
+
+        // System.out.println(webLinkDao.getLinkTupleCount());
+        // List<LinkTuple> exp = new ArrayList<LinkTuple>();
+        // List<LinkTuple> imp = new ArrayList<LinkTuple>();
+        // List<LinkTuple> sem = new ArrayList<LinkTuple>();
+        // Iterator<LinkTuple> linkTupleIterator =
+        // webLinkDao.getLinkTupleIterator();
+        // while (linkTupleIterator.hasNext()) {
+        // LinkTuple next = linkTupleIterator.next();
+        // if (next.getLinkType() == LinkType.ExplicitLink) {
+        // exp.add(next);
+        // }
+        // else if (next.getLinkType() == LinkType.ImplicitLink) {
+        // imp.add(next);
+        // }
+        // else if (next.getLinkType() == LinkType.SemanticLink) {
+        // sem.add(next);
+        // }
+        // }
+        // FileUtils.writeLines(new File("exp.txt"), exp);
+        // FileUtils.writeLines(new File("imp.txt"), imp);
+        // FileUtils.writeLines(new File("sem.txt"), sem);
 
         enhancedHtmlPageDao.close();
 
@@ -61,7 +92,6 @@ public class MainApp {
 
         env.close();
     }
-
     // public static void main(String[] args) {
     //
     // }

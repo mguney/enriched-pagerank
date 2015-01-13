@@ -20,6 +20,38 @@ public class LinkTuple implements Serializable {
 
     LinkType linkType;
 
+    public String getFrom() {
+        return this.from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    public String getTo() {
+        return this.to;
+    }
+
+    public void setTo(String to) {
+        this.to = to;
+    }
+
+    public String getRel() {
+        return this.rel;
+    }
+
+    public void setRel(String rel) {
+        this.rel = rel;
+    }
+
+    public LinkType getLinkType() {
+        return this.linkType;
+    }
+
+    public void setLinkType(LinkType linkType) {
+        this.linkType = linkType;
+    }
+
     public LinkTuple(String from, LinkType linkType, String to) {
         this.from = from;
         this.linkType = linkType;

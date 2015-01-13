@@ -3,6 +3,7 @@ package com.gun3y.pagerank.analyzer;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,10 +20,11 @@ public class LinkAnalysisManager {
 
     private WebLinkDao webLinkDao;
 
-    // private LinkStorage linkStorage = new LinkStorage();
+    private LinkAnalyzer explicitLinkAnalyzer = new ExplicitLinkAnalyzer();
 
-    private LinkAnalyzer[] analyers = new LinkAnalyzer[] { new ExplicitLinkAnalyzer(), new ImplicitLinkAnalyzer(),
-            new SemanticLinkAnalyzer() };
+    private LinkAnalyzer implicitLinkAnalyzer = new ImplicitLinkAnalyzer();
+
+    private LinkAnalyzer semanticLinkAnalyzer = new SemanticLinkAnalyzer();
 
     public LinkAnalysisManager(EnhancedHtmlPageDao htmlPageDao, WebLinkDao webLinkDao) {
         super();
@@ -32,14 +34,35 @@ public class LinkAnalysisManager {
 
     public void analyze() {
         LOGGER.info("Link Analysis has started");
+        StopWatch pageTimer = new StopWatch();
 
+        pageTimer.start();
         this.webLinkDao.removeAll();
-        LOGGER.info("LinkTuples has been cleaned");
+        pageTimer.stop();
+        LOGGER.info("LinkTuples has been cleaned in {}ms", pageTimer.getTime());
 
         Iterator<EnhancedHtmlPage> ePageIterator = this.htmlPageDao.getHtmlPageIterator();
         while (ePageIterator.hasNext()) {
             EnhancedHtmlPage ePage = ePageIterator.next();
 
+            pageTimer.reset();
+            pageTimer.start();
+            List<LinkTuple> explicitTuples = this.explicitLinkAnalyzer.analyze(ePage);
+            this.webLinkDao.addLinkTuple(explicitTuples);
+            pageTimer.stop();
+            LOGGER.info("{}: Explicit Links: {} Time: {}", ePage.getUrl(), explicitTuples.size(), pageTimer.getTime());
+
+            pageTimer.reset();
+            pageTimer.start();
+            List<LinkTuple> semanticTuples = this.semanticLinkAnalyzer.analyze(ePage);
+            this.webLinkDao.addLinkTuple(semanticTuples);
+            pageTimer.stop();
+            LOGGER.info("{}: Semantic Links: {} Time: {}", ePage.getUrl(), semanticTuples.size(), pageTimer.getTime());
+
+            int total = 0;
+            int totalLinks = 0;
+            pageTimer.reset();
+            pageTimer.start();
             Iterator<EnhancedHtmlPage> tempPageIterator = this.htmlPageDao.getHtmlPageIterator();
             while (tempPageIterator.hasNext()) {
                 EnhancedHtmlPage tempPage = tempPageIterator.next();
@@ -48,12 +71,14 @@ public class LinkAnalysisManager {
                     continue;
                 }
 
-                for (LinkAnalyzer linkAnalyzer : this.analyers) {
-                    List<LinkTuple> tuples = linkAnalyzer.analyze(ePage, tempPage);
-                    System.out.println(linkAnalyzer.getClass() + " " + tuples.size());
-                    this.webLinkDao.addLinkTuple(tuples);
-                }
+                List<LinkTuple> implicitTuples = this.implicitLinkAnalyzer.analyze(ePage, tempPage);
+                this.webLinkDao.addLinkTuple(implicitTuples);
+
+                totalLinks += implicitTuples.size();
+                total++;
             }
+            pageTimer.stop();
+            LOGGER.info("{}: Implicit Links: {} in {} page Time: {}", ePage.getUrl(), totalLinks, total, pageTimer.getTime());
         }
 
         // this.linkStorage.reduceLinks(5);

@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sleepycat.bind.serial.SerialBinding;
 import com.sleepycat.bind.serial.StoredClassCatalog;
-import com.sleepycat.collections.StoredList;
+import com.sleepycat.collections.StoredMap;
 import com.sleepycat.je.Database;
 import com.sleepycat.je.DatabaseConfig;
 import com.sleepycat.je.DatabaseException;
@@ -25,7 +25,7 @@ public class WebLinkDao {
 
     protected StoredClassCatalog catalog;
 
-    protected StoredList<LinkTuple> webLinkList;
+    protected StoredMap<Integer, LinkTuple> weblinkMap;
 
     public WebLinkDao(Environment env) {
 
@@ -42,8 +42,8 @@ public class WebLinkDao {
 
         this.weblinkDB = this.env.openDatabase(null, WEBLINK_DB, dbConfig);
 
-        // TODO: burası çalışmıyor
-        this.webLinkList = new StoredList<LinkTuple>(this.weblinkDB, new SerialBinding<LinkTuple>(this.catalog, LinkTuple.class), true);
+        this.weblinkMap = new StoredMap<Integer, LinkTuple>(this.weblinkDB, new SerialBinding<Integer>(this.catalog, Integer.class),
+                new SerialBinding<LinkTuple>(this.catalog, LinkTuple.class), true);
     }
 
     public void addLinkTuple(LinkTuple linkTuple) {
@@ -51,7 +51,7 @@ public class WebLinkDao {
             return;
         }
 
-        this.webLinkList.add(linkTuple);
+        this.weblinkMap.put(this.weblinkMap.size() + 1, linkTuple);
 
     }
 
@@ -60,20 +60,21 @@ public class WebLinkDao {
             return;
         }
 
-        this.webLinkList.addAll(linkTuples);
-
+        for (LinkTuple linkTuple : linkTuples) {
+            this.addLinkTuple(linkTuple);
+        }
     }
 
     public int getLinkTupleCount() {
-        return this.webLinkList.size();
+        return this.weblinkMap.size();
     }
 
     public Iterator<LinkTuple> getLinkTupleIterator() {
-        return this.webLinkList.iterator();
+        return this.weblinkMap.values().iterator();
     }
 
     public void removeAll() {
-        this.webLinkList.clear();
+        this.weblinkMap.clear();
     }
 
     public void close() {

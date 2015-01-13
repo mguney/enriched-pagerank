@@ -1,6 +1,7 @@
 package com.gun3y.pagerank.analyzer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -14,6 +15,11 @@ public class ExplicitLinkAnalyzer implements LinkAnalyzer {
 
     @Override
     public List<LinkTuple> analyze(EnhancedHtmlPage ePage, EnhancedHtmlPage tempPage) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<LinkTuple> analyze(EnhancedHtmlPage ePage) {
         List<LinkTuple> tuples = new ArrayList<LinkTuple>();
 
         if (ePage == null || StringUtils.isBlank(ePage.getUrl())) {
@@ -31,11 +37,5 @@ public class ExplicitLinkAnalyzer implements LinkAnalyzer {
         }
 
         return tuples;
-
-    }
-
-    @Override
-    public List<LinkTuple> analyze(EnhancedHtmlPage ePage) {
-        return this.analyze(ePage, null);
     }
 }

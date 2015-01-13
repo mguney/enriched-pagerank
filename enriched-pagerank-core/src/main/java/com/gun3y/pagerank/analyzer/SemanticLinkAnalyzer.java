@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,22 +66,14 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
                 .getPath()));
         String baseUrl = "http://en.wikipedia.org/";
 
-        String text = "The \"Kingdom of England\" - which \"after 1284\" included Wales - was a \"sovereign state\" until 1 May 1707, when the \"Acts of Union\" put into effect the terms agreed in the \"Treaty of Union\" the previous year, resulting in a political union with the \"Kingdom of Scotland\" to create the \"Kingdom of Great Britain\".\"[9]\" \"[10]\" In 1801, Great Britain was united with the \"Kingdom of Ireland\" through another \"Act of Union\" to become the \"United Kingdom of Great Britain and Ireland\" . In 1922 the \"Irish Free State\" seceded from the United Kingdom, leading to the latter being \"renamed\" the United Kingdom of Great Britain and Northern Ireland.";
+        String text = "\"#ShareIloilo: Miag-ao Church\" \"#ShareIloilo: Camia Balay na Bato\" \"#ShareBaguio Twitter Conversation: Why travel to Baguio?\" \"Revilla bail petition, Pope Francis PH mass, Obama daughters | The wRap\" \"More Stories\" \"The wRap\"";
         Map<String, String> map = new HashMap<String, String>();
-        map.put("[ 9 ]", "link1");
-        map.put("[ 10 ]", "link2");
-        map.put("Treaty of Union", "link3");
-        map.put("Kingdom of Scotland", "link4");
-        map.put("sovereign state", "link5");
-        map.put("Irish Free State", "link6");
-        map.put("Kingdom of Great Britain", "link6");
-        map.put("Kingdom of Ireland", "link6");
-        map.put("Act of Union", "link6");
-        map.put("Kingdom of England", "link6");
-        map.put("United Kingdom of Great Britain and Ireland", "link6");
-        map.put("after 1284", "link6");
-        map.put("Acts of Union", "link6");
-        map.put("renamed", "link6");
+        map.put("#ShareIloilo: Miag-ao Church", "link1");
+        map.put("#ShareIloilo: Camia Balay na Bato", "link2");
+        map.put("#ShareBaguio Twitter Conversation: Why travel to Baguio?", "link3");
+        map.put("Revilla bail petition, Pope Francis PH mass, Obama daughters | The wRap", "link4");
+        map.put("More Stories", "link5");
+        map.put("The wRap", "link6");
 
         // String text = "\"Ethnic groups\" ( \"2011\" )";
         // Map<String, String> map = new HashMap<String, String>();
@@ -108,7 +101,7 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
 
     @Override
     public List<LinkTuple> analyze(EnhancedHtmlPage ePage, EnhancedHtmlPage tempPage) {
-        return this.analyze(ePage);
+        return Collections.emptyList();
     }
 
     private List<LinkTuple> analyze(List<LineItem> lines) {
@@ -124,7 +117,7 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
             if (lineItem.getUrls().size() < 2) {
                 continue;
             }
-
+            LOGGER.debug(lineItem.getLine());
             Annotation document = this.pipeline.process(lineItem.getLine());
 
             List<CoreMap> sentences = document.get(SentencesAnnotation.class);
@@ -170,7 +163,9 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
 
                     PairWord triple = this.extractSemanticTriple(semanticGraph, pairWord);
                     if (triple != null) {
-                        tuples.add(new LinkTuple(triple.firstUrl, LinkType.SemanticLink, triple.secondUrl, triple.predicate));
+                        LinkTuple tuple = new LinkTuple(triple.firstUrl, LinkType.SemanticLink, triple.secondUrl, triple.predicate);
+                        LOGGER.debug(tuple.toString());
+                        tuples.add(tuple);
                     }
 
                 }
@@ -199,10 +194,17 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
     }
 
     private PairWord extractSemanticTriple(SemanticGraph semanticGraph, PairWord pairWord) {
+        if (pairWord.firstWord == null || pairWord.secondWord == null) {
+            return null;
+        }
         List<IndexedWord> firstPath = semanticGraph.getPathToRoot(pairWord.firstWord);
         List<IndexedWord> secondPath = semanticGraph.getPathToRoot(pairWord.secondWord);
         List<SemanticGraphEdge> edges = null;
         boolean reverse = false;
+        if (firstPath == null || secondPath == null) {
+            LOGGER.error("IndexedWord ({} path is null", pairWord.toString());
+            return null;
+        }
 
         if (firstPath.size() > secondPath.size()) {
             reverse = true;
@@ -305,7 +307,8 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
         int i = 0;
         for (; i < tokens.size(); i++) {
             CoreLabel coreLabel = tokens.get(i);
-            if (StringUtil.in(coreLabel.tag(), "-LRB-", "-RRB-", "-LCB-", "-RCB-", "-LSB-", "-RSB-")) {
+            String tag = coreLabel.tag();
+            if (StringUtils.isBlank(tag) || tag.length() < 2 || StringUtil.in(tag, "-LRB-", "-RRB-", "-LCB-", "-RCB-", "-LSB-", "-RSB-")) {
                 continue;
             }
             ancestorWord = semanticGraph.getNodeByWordPattern(coreLabel.originalText());
@@ -318,7 +321,8 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
 
         for (; i < tokens.size(); i++) {
             CoreLabel coreLabel = tokens.get(i);
-            if (StringUtil.in(coreLabel.tag(), "-LRB-", "-RRB-", "-LCB-", "-RCB-", "-LSB-", "-RSB-")) {
+            String tag = coreLabel.tag();
+            if (StringUtils.isBlank(tag) || tag.length() < 2 || StringUtil.in(tag, "-LRB-", "-RRB-", "-LCB-", "-RCB-", "-LSB-", "-RSB-")) {
                 continue;
             }
             IndexedWord tempWord = semanticGraph.getNodeByWordPattern(coreLabel.originalText());
@@ -328,7 +332,7 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
             }
 
             List<IndexedWord> pathToRoot = semanticGraph.getPathToRoot(tempWord);
-            if (!pathToRoot.contains(ancestorWord)) {
+            if (pathToRoot != null && !pathToRoot.contains(ancestorWord)) {
                 ancestorWord = tempWord;
             }
         }
