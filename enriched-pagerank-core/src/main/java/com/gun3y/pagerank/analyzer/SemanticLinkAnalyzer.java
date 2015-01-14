@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.regex.PatternSyntaxException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -311,7 +312,13 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
             if (StringUtils.isBlank(tag) || tag.length() < 2 || StringUtil.in(tag, "-LRB-", "-RRB-", "-LCB-", "-RCB-", "-LSB-", "-RSB-")) {
                 continue;
             }
-            ancestorWord = semanticGraph.getNodeByWordPattern(coreLabel.originalText());
+
+            try {
+                ancestorWord = semanticGraph.getNodeByWordPattern(coreLabel.originalText());
+            }
+            catch (Exception e) {
+                continue;
+            }
 
             if (ancestorWord != null) {
                 i++;
@@ -325,7 +332,13 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
             if (StringUtils.isBlank(tag) || tag.length() < 2 || StringUtil.in(tag, "-LRB-", "-RRB-", "-LCB-", "-RCB-", "-LSB-", "-RSB-")) {
                 continue;
             }
-            IndexedWord tempWord = semanticGraph.getNodeByWordPattern(coreLabel.originalText());
+            IndexedWord tempWord = null;
+            try {
+                tempWord = semanticGraph.getNodeByWordPattern(coreLabel.originalText());
+            }
+            catch (PatternSyntaxException e) {
+                continue;
+            }
 
             if (tempWord == null) {
                 continue;

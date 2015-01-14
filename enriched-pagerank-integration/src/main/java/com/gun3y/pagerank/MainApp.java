@@ -2,6 +2,7 @@ package com.gun3y.pagerank;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Calendar;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,12 +47,18 @@ public class MainApp {
     }
 
     public static void main(String[] args) throws IOException {
+        System.out.println(Calendar.getInstance().getTime());
         Environment env = DBUtils.newEnvironment(DB_PATH);
         LOGGER.info("New Environment has been created");
 
         EnhancedHtmlPageDao enhancedHtmlPageDao = new EnhancedHtmlPageDao(env);
         WebLinkDao webLinkDao = new WebLinkDao(env);
 
+        // EnhancedHtmlPage htmlPageByUrl = enhancedHtmlPageDao
+        // .getHtmlPageByUrl("http://www.bbc.com/future/story/20141201-the-myths-about-ptsd");
+        //
+        // SemanticLinkAnalyzer analyzer = new SemanticLinkAnalyzer();
+        // analyzer.analyze(htmlPageByUrl);
         // StopWatch stopWatch = new StopWatch();
         // stopWatch.start();
         // // System.out.println(webLinkDao.getLinkTupleCount());
@@ -91,6 +98,7 @@ public class MainApp {
         webLinkDao.close();
 
         env.close();
+        System.out.println(Calendar.getInstance().getTime());
     }
     // public static void main(String[] args) {
     //
