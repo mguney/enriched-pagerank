@@ -16,14 +16,7 @@
 			<groupId>org.mongodb.morphia</groupId>
 			<artifactId>morphia</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>virtuoso</groupId>
-			<artifactId>virtjdbc</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>virtuoso</groupId>
-			<artifactId>virtjena</artifactId>
-		</dependency>
+	
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-arq</artifactId>

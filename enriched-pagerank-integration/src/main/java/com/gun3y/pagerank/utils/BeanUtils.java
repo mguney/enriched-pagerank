@@ -20,8 +20,6 @@ public class BeanUtils {
 
     public static GraphNode newGraphNode(EnhancedHtmlPage enhancedHtmlPage) {
         GraphNode graphNode = new GraphNode();
-
-        graphNode.setPageId(enhancedHtmlPage.getPageId());
         graphNode.setUrl(enhancedHtmlPage.getUrl());
         graphNode.setPageRank(0.15d);
 
@@ -48,12 +46,9 @@ public class BeanUtils {
         HtmlToText formatter = new HtmlToText();
         enhancedHtmlPage.setLines(formatter.getLines(doc));
 
-        enhancedHtmlPage.setPageId(url.getDocid());
         enhancedHtmlPage.setHtml(html);
-        enhancedHtmlPage.setText(text);
 
         enhancedHtmlPage.setTitle(title);
-        enhancedHtmlPage.setStemmedTitle(LangUtils.joinList(LangUtils.extractStemmedWords(title)));
         enhancedHtmlPage.setStemmedText(LangUtils.joinList(LangUtils.extractStemmedWords(text)));
         enhancedHtmlPage.setUrl(url.getUrl());
 

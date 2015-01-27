@@ -7,16 +7,12 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.gun3y.pagerank.dao.LinkTuple;
 import com.gun3y.pagerank.entity.EnhancedHtmlPage;
+import com.gun3y.pagerank.entity.HtmlTitle;
+import com.gun3y.pagerank.entity.LinkTuple;
 import com.gun3y.pagerank.entity.LinkType;
 
 public class ExplicitLinkAnalyzer implements LinkAnalyzer {
-
-    @Override
-    public List<LinkTuple> analyze(EnhancedHtmlPage ePage, EnhancedHtmlPage tempPage) {
-        return Collections.emptyList();
-    }
 
     @Override
     public List<LinkTuple> analyze(EnhancedHtmlPage ePage) {
@@ -37,5 +33,10 @@ public class ExplicitLinkAnalyzer implements LinkAnalyzer {
         }
 
         return tuples;
+    }
+
+    @Override
+    public List<LinkTuple> analyze(EnhancedHtmlPage ePage, HtmlTitle htmlTitle) {
+        return Collections.emptyList();
     }
 }

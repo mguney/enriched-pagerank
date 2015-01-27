@@ -13,7 +13,6 @@ import com.gun3y.pagerank.entity.LinkType;
 import com.gun3y.pagerank.entity.graph.GraphEdge;
 import com.gun3y.pagerank.entity.graph.GraphNode;
 import com.gun3y.pagerank.store.MongoHtmlPageDao;
-import com.gun3y.pagerank.store.VirtuosoManager;
 import com.gun3y.pagerank.utils.BeanUtils;
 
 public class PageRankManager {
@@ -21,12 +20,9 @@ public class PageRankManager {
 
     private MongoHtmlPageDao mongoManager;
 
-    private VirtuosoManager virtuosoManager;
-
-    public PageRankManager(MongoHtmlPageDao mongoManager, VirtuosoManager virtuosoManager) {
+    public PageRankManager(MongoHtmlPageDao mongoManager) {
         super();
         this.mongoManager = mongoManager;
-        this.virtuosoManager = virtuosoManager;
     }
 
     public PageRankManager() {
@@ -145,22 +141,24 @@ public class PageRankManager {
         while (enhancedHtmlPageIterator.hasNext()) {
             EnhancedHtmlPage enhancedHtmlPage = enhancedHtmlPageIterator.next();
             GraphNode graphNode = BeanUtils.newGraphNode(enhancedHtmlPage);
-            this.virtuosoManager.addGraphNode(graphNode);
+            // this.virtuosoManager.addGraphNode(graphNode);
         }
-        long nodeCount = this.virtuosoManager.getGraphNodeCount();
+        // long nodeCount = this.virtuosoManager.getGraphNodeCount();
         timer.stop();
-        LOGGER.info("GraphNodes({}) haven added into DB in {} ms", nodeCount, timer.getTime());
+        // LOGGER.info("GraphNodes({}) haven added into DB in {} ms", nodeCount,
+        // timer.getTime());
 
     }
 
     private void transformInitialPageRanks() {
         StopWatch rankTimer = new StopWatch();
         rankTimer.start();
-        long totalCount = this.virtuosoManager.getGraphNodeCount();
-        double basePR = 1 / totalCount;
-        this.virtuosoManager.updateGraphNode(basePR);
+        // long totalCount = this.virtuosoManager.getGraphNodeCount();
+        // double basePR = 1 / totalCount;
+        // this.virtuosoManager.updateGraphNode(basePR);
         rankTimer.stop();
-        LOGGER.info("Initial PageRanks({}) have been applied  in {} ms", basePR, rankTimer.getTime());
+        // LOGGER.info("Initial PageRanks({}) have been applied  in {} ms",
+        // basePR, rankTimer.getTime());
 
     }
 

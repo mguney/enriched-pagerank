@@ -1,4 +1,4 @@
-package com.gun3y.pagerank.dao;
+package com.gun3y.pagerank.entity;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,8 +11,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
-
-import com.gun3y.pagerank.entity.LinkType;
 
 public class LinkStorage {
 
@@ -43,13 +41,13 @@ public class LinkStorage {
 
         final Map<String, Integer> counts = new HashMap<String, Integer>();
         for (LinkTuple linkTuple : linkTuples) {
-            if (StringUtils.isNotBlank(linkTuple.rel)) {
-                Integer co = counts.get(linkTuple.rel);
+            if (StringUtils.isNotBlank(linkTuple.getRel())) {
+                Integer co = counts.get(linkTuple.getRel());
                 if (co == null) {
-                    counts.put(linkTuple.rel, 1);
+                    counts.put(linkTuple.getRel(), 1);
                 }
                 else {
-                    counts.put(linkTuple.rel, co + 1);
+                    counts.put(linkTuple.getRel(), co + 1);
                 }
 
             }
@@ -68,7 +66,7 @@ public class LinkStorage {
         linkTuples.removeIf(new Predicate<LinkTuple>() {
             @Override
             public boolean test(LinkTuple t) {
-                return cSet.contains(t.rel);
+                return cSet.contains(t.getRel());
             }
         });
 
@@ -96,7 +94,7 @@ public class LinkStorage {
         if (linkTuple == null || !linkTuple.validate()) {
             return;
         }
-        switch (linkTuple.linkType) {
+        switch (linkTuple.getLinkType()) {
             case ExplicitLink:
                 this.explicitLinks.add(linkTuple);
                 break;

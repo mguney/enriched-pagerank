@@ -2,52 +2,34 @@ package com.gun3y.pagerank.analyzer;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.gun3y.pagerank.dao.LinkTuple;
 import com.gun3y.pagerank.entity.EnhancedHtmlPage;
+import com.gun3y.pagerank.entity.HtmlTitle;
+import com.gun3y.pagerank.entity.LinkTuple;
 import com.gun3y.pagerank.entity.LinkType;
 
 public class ImplicitLinkAnalyzer implements LinkAnalyzer {
 
     @Override
-    public List<LinkTuple> analyze(EnhancedHtmlPage ePage, EnhancedHtmlPage tempPage) {
+    public List<LinkTuple> analyze(EnhancedHtmlPage ePage, HtmlTitle htmlTitle) {
         List<LinkTuple> tuples = new ArrayList<LinkTuple>();
 
-        if (ePage == null || tempPage == null || ePage.getPageId() == tempPage.getPageId()) {
+        if (ePage == null || htmlTitle == null || !htmlTitle.validate()) {
             return tuples;
         }
 
-        Set<String> stemmedTitles = new HashSet<String>();
-        String stemmedTitle = ePage.getStemmedTitle();
-
-        if (StringUtils.isNotBlank(stemmedTitle)) {
-            stemmedTitles.add(stemmedTitle);
-        }
-
-        Set<String> stemmedAnchorTitles = ePage.getStemmedAnchorTitles();
-        if (stemmedAnchorTitles != null) {
-            stemmedTitles.addAll(stemmedAnchorTitles);
-        }
-
-        if (stemmedTitles.isEmpty()) {
-            return tuples;
-        }
-
-        String stemmedText = tempPage.getStemmedText();
+        String stemmedText = ePage.getStemmedText();
         if (StringUtils.isBlank(stemmedText)) {
             return tuples;
         }
-        for (String key : stemmedTitles) {
-            int countMatches = StringUtils.countMatches(stemmedText, key);
-            while (countMatches > 0) {
-                tuples.add(new LinkTuple(tempPage.getUrl(), LinkType.ImplicitLink, ePage.getUrl(), key));
-                countMatches--;
-            }
+
+        int countMatches = StringUtils.countMatches(stemmedText, htmlTitle.getStemmedTitle());
+        while (countMatches > 0) {
+            tuples.add(new LinkTuple(ePage.getUrl(), LinkType.ImplicitLink, htmlTitle.getUrl(), htmlTitle.getStemmedTitle()));
+            countMatches--;
         }
 
         return tuples;
@@ -58,4 +40,5 @@ public class ImplicitLinkAnalyzer implements LinkAnalyzer {
     public List<LinkTuple> analyze(EnhancedHtmlPage ePage) {
         return Collections.emptyList();
     }
+
 }

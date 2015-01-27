@@ -13,19 +13,13 @@ public class EnhancedHtmlPage implements Serializable {
 
     private String url;
 
-    private int pageId;
-
     private String html;
 
     private String title;
 
-    private String text;
-
-    private Set<String> stemmedAnchorTitles;
+    private Set<String> anchors;
 
     private Set<String> outgoingUrls;
-
-    private String stemmedTitle;
 
     private String stemmedText;
 
@@ -33,7 +27,7 @@ public class EnhancedHtmlPage implements Serializable {
 
     public EnhancedHtmlPage() {
         super();
-        this.stemmedAnchorTitles = new HashSet<String>();
+        this.setAnchors(new HashSet<String>());
     }
 
     public String getUrl() {
@@ -42,14 +36,6 @@ public class EnhancedHtmlPage implements Serializable {
 
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    public int getPageId() {
-        return this.pageId;
-    }
-
-    public void setPageId(int pageId) {
-        this.pageId = pageId;
     }
 
     public String getHtml() {
@@ -66,30 +52,6 @@ public class EnhancedHtmlPage implements Serializable {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public String getText() {
-        return this.text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public Set<String> getStemmedAnchorTitles() {
-        return this.stemmedAnchorTitles;
-    }
-
-    public void setStemmedAnchorTitles(Set<String> stemmedAnchorTitles) {
-        this.stemmedAnchorTitles = stemmedAnchorTitles;
-    }
-
-    public String getStemmedTitle() {
-        return this.stemmedTitle;
-    }
-
-    public void setStemmedTitle(String stemmedTitle) {
-        this.stemmedTitle = stemmedTitle;
     }
 
     public String getStemmedText() {
@@ -114,6 +76,14 @@ public class EnhancedHtmlPage implements Serializable {
 
     public void setLines(List<LineItem> lines) {
         this.lines = lines;
+    }
+
+    public Set<String> getAnchors() {
+        return this.anchors;
+    }
+
+    public void setAnchors(Set<String> anchors) {
+        this.anchors = anchors;
     }
 
 }

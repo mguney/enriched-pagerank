@@ -22,8 +22,9 @@ import org.slf4j.LoggerFactory;
 
 import com.gun3y.pagerank.common.HtmlToText;
 import com.gun3y.pagerank.common.LineItem;
-import com.gun3y.pagerank.dao.LinkTuple;
 import com.gun3y.pagerank.entity.EnhancedHtmlPage;
+import com.gun3y.pagerank.entity.HtmlTitle;
+import com.gun3y.pagerank.entity.LinkTuple;
 import com.gun3y.pagerank.entity.LinkType;
 
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
@@ -44,7 +45,7 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SemanticLinkAnalyzer.class);
 
-    private static final String IN_SAME_SENTENCE = "__inSameSentence__";
+    public static final String IN_SAME_SENTENCE = "__inSameSentence__";
 
     private StanfordCoreNLP pipeline;
 
@@ -101,7 +102,7 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
     }
 
     @Override
-    public List<LinkTuple> analyze(EnhancedHtmlPage ePage, EnhancedHtmlPage tempPage) {
+    public List<LinkTuple> analyze(EnhancedHtmlPage ePage, HtmlTitle htmlTitle) {
         return Collections.emptyList();
     }
 

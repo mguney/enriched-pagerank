@@ -1,6 +1,7 @@
 package com.gun3y.pagerank.aggregator;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -22,7 +23,6 @@ import com.gun3y.pagerank.entity.html.HtmlPage;
 import com.gun3y.pagerank.store.MongoHtmlPageDao;
 import com.gun3y.pagerank.utils.BeanUtils;
 import com.gun3y.pagerank.utils.HtmlUtils;
-import com.gun3y.pagerank.utils.LangUtils;
 
 public class HtmlAggregator {
 
@@ -104,7 +104,6 @@ public class HtmlAggregator {
         Iterator<EnhancedHtmlPage> enhancedHtmlPageIterator = this.enhancedHtmlPageDao.getHtmlPageIterator();
         while (enhancedHtmlPageIterator.hasNext()) {
             EnhancedHtmlPage enhancedHtmlPage = enhancedHtmlPageIterator.next();
-
             this.updateAnchors(enhancedHtmlPage.getHtml(), enhancedHtmlPage.getUrl());
         }
         LOGGER.info("EnhancedHtmlPages({}) have been updated in {} ms", nodeCount, timer.getTime());
@@ -148,13 +147,14 @@ public class HtmlAggregator {
                 }
 
                 if (StringUtils.isNotBlank(anchor)) {
-                    String stemmedAnchor = LangUtils.joinList(LangUtils.extractStemmedWords(anchor));
-                    Set<String> stemmedAnchorTitles = nextEnhancedHtmlPage.getStemmedAnchorTitles();
-
-                    if (StringUtils.isNotBlank(stemmedAnchor)) {
-                        stemmedAnchorTitles.add(stemmedAnchor);
-                        this.enhancedHtmlPageDao.updateHtmlPage(nextEnhancedHtmlPage.getUrl(), nextEnhancedHtmlPage);
+                    Set<String> anchors = nextEnhancedHtmlPage.getAnchors();
+                    if (anchors == null) {
+                        anchors = new HashSet<String>();
                     }
+
+                    anchors.add(anchor);
+                    nextEnhancedHtmlPage.setAnchors(anchors);
+                    this.enhancedHtmlPageDao.updateHtmlPage(nextEnhancedHtmlPage.getUrl(), nextEnhancedHtmlPage);
                 }
             }
         }
