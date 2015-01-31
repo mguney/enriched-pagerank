@@ -46,7 +46,7 @@ public class LinkAnalysisManager {
 
         this.explicitLinkAnalyzer = new ExplicitLinkAnalyzer();
         this.implicitLinkAnalyzer = new ImplicitLinkAnalyzer();
-        this.semanticLinkAnalyzer = new SemanticLinkAnalyzer();
+        this.semanticLinkAnalyzer = new SemanticLinkAnalyzer(3);
     }
 
     public void analyze() {
@@ -61,7 +61,7 @@ public class LinkAnalysisManager {
 
         this.analyzeImplicitLinks();
 
-        // this.analyzeSemanticLinks();
+        this.analyzeSemanticLinks();
 
         LOGGER.info("Link Analysis has ended in {}ms", pageTimer.getTime());
     }
@@ -73,17 +73,20 @@ public class LinkAnalysisManager {
         while (ePageIterator.hasNext()) {
             EnhancedHtmlPage ePage = ePageIterator.next();
 
-            Iterator<HtmlTitle> htmlTitleIterator = this.htmlTitleDao.getHtmlTitleIterator();
-            while (htmlTitleIterator.hasNext()) {
-                HtmlTitle htmlTitle = htmlTitleIterator.next();
+            pageTimer.reset();
+            pageTimer.start();
+            List<LinkTuple> semanticTuples = this.semanticLinkAnalyzer.analyze(ePage);
+            this.linkTupleDao.addLinkTuple(semanticTuples);
+            pageTimer.stop();
+            LOGGER.info("{}: Semantic Links: {} Time: {}", ePage.getUrl(), semanticTuples.size(), pageTimer.getTime());
 
-                pageTimer.reset();
-                pageTimer.start();
-                List<LinkTuple> semanticTuples = this.semanticLinkAnalyzer.analyze(ePage, htmlTitle);
-                this.linkTupleDao.addLinkTuple(semanticTuples);
-                pageTimer.stop();
-                LOGGER.info("{}: Semantic Links: {} Time: {}", ePage.getUrl(), semanticTuples.size(), pageTimer.getTime());
-            }
+            // Iterator<HtmlTitle> htmlTitleIterator =
+            // this.htmlTitleDao.getHtmlTitleIterator();
+            // while (htmlTitleIterator.hasNext()) {
+            // HtmlTitle htmlTitle = htmlTitleIterator.next();
+            //
+            //
+            // }
         }
 
         LOGGER.info("Filtering semantic links");
@@ -92,6 +95,7 @@ public class LinkAnalysisManager {
         int minCountFilter = this.linkTupleDao.applyMinCountFilter(LinkType.SemanticLink, MIN_LINK_OCCURS);
         pageTimer.stop();
         LOGGER.info("MinimumCount filter has been applied. {} links removed in {}ms", minCountFilter, pageTimer.getTime());
+        LOGGER.info("SemanticLinks (Total: {}) has been filtered", this.linkTupleDao.count(LinkType.SemanticLink));
     }
 
     private void analyzeImplicitLinks() {
@@ -114,7 +118,8 @@ public class LinkAnalysisManager {
             LOGGER.info("{}: Implicit Links: {}", ePage.getUrl(), totalLinks);
         }
         pageTimer.stop();
-        LOGGER.info("ImplicitLinks has been created in {}ms", pageTimer.getTime());
+        LOGGER.info("ImplicitLinks (Total: {}) has been created in {}ms", this.linkTupleDao.count(LinkType.ImplicitLink),
+                pageTimer.getTime());
 
         LOGGER.info("Filtering implicit links");
         pageTimer.reset();
@@ -128,7 +133,7 @@ public class LinkAnalysisManager {
         int sameUrlFilter = this.linkTupleDao.applySameUrlFilter(LinkType.ImplicitLink);
         pageTimer.stop();
         LOGGER.info("SameURL filter has been applied. {} links removed in {}ms", sameUrlFilter, pageTimer.getTime());
-        LOGGER.info("ImplicitLinks has been filtered");
+        LOGGER.info("ImplicitLinks (Total: {}) has been filtered", this.linkTupleDao.count(LinkType.ImplicitLink));
 
     }
 
@@ -180,8 +185,9 @@ public class LinkAnalysisManager {
             LOGGER.info("{}: Explicit Links: {}", ePage.getUrl(), explicitTuples.size());
             pageTimer.resume();
         }
-        LOGGER.info("Html titles has been prepared in {}ms", pageTimer.getTime());
-        LOGGER.info("ExplicitLinks has been created in {}ms", explicitLinkTimer.getTime());
+        LOGGER.info("Html titles (Total: {}) has been prepared in {}ms", this.htmlTitleDao.count(), pageTimer.getTime());
+        LOGGER.info("ExplicitLinks (Total: {}) has been created in {}ms", this.linkTupleDao.count(LinkType.ExplicitLink),
+                explicitLinkTimer.getTime());
     }
 
     private String stem(String title) {

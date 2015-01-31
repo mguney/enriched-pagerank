@@ -17,7 +17,7 @@ public class ImplicitLinkAnalyzer implements LinkAnalyzer {
     public List<LinkTuple> analyze(EnhancedHtmlPage ePage, HtmlTitle htmlTitle) {
         List<LinkTuple> tuples = new ArrayList<LinkTuple>();
 
-        if (ePage == null || htmlTitle == null || !htmlTitle.validate()) {
+        if (ePage == null || htmlTitle == null || !htmlTitle.validate() || ePage.getUrl().equals(htmlTitle.getUrl())) {
             return tuples;
         }
 

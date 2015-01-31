@@ -30,6 +30,10 @@ public class DBUtils {
     }
 
     public static boolean deleteFolderContents(File folder) {
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+
         File[] files = folder.listFiles();
         for (File file : files) {
             if (file.isFile()) {

@@ -16,7 +16,7 @@ public class BasicCrawlController {
          * crawlStorageFolder is a folder where intermediate crawl data is
          * stored.
          */
-        final String crawlStorageFolder = "crawlData4";
+        final String crawlStorageFolder = "new_crawldata";
 
         /*
          * numberOfCrawlers shows the number of concurrent threads that should
@@ -64,6 +64,7 @@ public class BasicCrawlController {
          */
         config.setResumableCrawling(false);
 
+        config.setFollowRedirects(true);
         /*
          * Instantiate the controller for this crawl.
          */
@@ -80,11 +81,29 @@ public class BasicCrawlController {
          * URLs that are fetched and then the crawler starts following links
          * which are found in these pages
          */
-        controller.addSeed("http://www.ics.uci.edu/");
-        controller.addSeed("http://www.ics.uci.edu/~lopes/");
-        controller.addSeed("http://www.ics.uci.edu/~welling/");
+        controller.addSeed("http://en.wikipedia.org/wiki/The_Matrix");
+        controller.addSeed("http://en.wikipedia.org/wiki/Batman:_Arkham_City");
+        controller.addSeed("http://en.wikipedia.org/wiki/The_Lord_of_the_Rings");
+        controller.addSeed("http://en.wikipedia.org/wiki/Avatar_(2009_film)");
+        controller.addSeed("http://en.wikipedia.org/wiki/Star_Wars");
+        controller.addSeed("http://en.wikipedia.org/wiki/Battlestar_Galactica_(2004_TV_series)");
+        controller.addSeed("http://en.wikipedia.org/wiki/Lost_(TV_series)");
+        controller.addSeed("http://en.wikipedia.org/wiki/Prison_Break");
+        controller.addSeed("http://en.wikipedia.org/wiki/Supernatural_(U.S._TV_series)");
+        controller.addSeed("http://en.wikipedia.org/wiki/Person_of_Interest_(TV_series)");
+        controller.addSeed("http://en.wikipedia.org/wiki/Arrow_(TV_series)");
+        controller.addSeed("http://en.wikipedia.org/wiki/Turkey");
+        controller.addSeed("http://en.wikipedia.org/wiki/Ottoman_Empire");
+        controller.addSeed("http://en.wikipedia.org/wiki/England");
+        controller.addSeed("http://en.wikipedia.org/wiki/France");
+        controller.addSeed("http://en.wikipedia.org/wiki/United_States");
+        controller.addSeed("http://en.wikipedia.org/wiki/Space");
+        controller.addSeed("http://en.wikipedia.org/wiki/Mathematics");
+        controller.addSeed("http://en.wikipedia.org/wiki/Computer");
+        controller.addSeed("http://en.wikipedia.org/wiki/Software");
+        controller.addSeed("http://en.wikipedia.org/wiki/Manchester");
 
-        MongoHtmlPageDao mongoManager = new MongoHtmlPageDao();
+        MongoHtmlPageDao mongoManager = new MongoHtmlPageDao("localhost", "PRDB");
         mongoManager.init();
 
         controller.setCustomData(mongoManager);

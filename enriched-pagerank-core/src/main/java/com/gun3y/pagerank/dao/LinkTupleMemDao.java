@@ -350,9 +350,9 @@ public class LinkTupleMemDao {
             case ExplicitLink:
                 return this.explicitLinks;
             case ImplicitLink:
-                return this.explicitLinks;
+                return this.implicitLinks;
             case SemanticLink:
-                return this.explicitLinks;
+                return this.semanticLinks;
             default:
                 return Collections.emptyList();
         }

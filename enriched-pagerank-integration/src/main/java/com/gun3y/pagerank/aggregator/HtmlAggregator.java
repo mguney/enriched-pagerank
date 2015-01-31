@@ -36,6 +36,8 @@ public class HtmlAggregator {
 
     private EnhancedHtmlPageDao enhancedHtmlPageDao;
 
+    private Set<String> tempUrls = new HashSet<String>();
+
     public HtmlAggregator(MongoHtmlPageDao mongoHtmlPageDao, EnhancedHtmlPageDao enhancedHtmlPageDao) {
         this.mongoHtmlPageDao = mongoHtmlPageDao;
         this.enhancedHtmlPageDao = enhancedHtmlPageDao;
@@ -133,30 +135,36 @@ public class HtmlAggregator {
                 continue;
             }
 
+            if (this.tempUrls.contains(absUrl)) {
+                continue;
+            }
+
             EnhancedHtmlPage nextEnhancedHtmlPage = this.enhancedHtmlPageDao.getHtmlPageByUrl(absUrl);
             if (nextEnhancedHtmlPage == null) {
                 LOGGER.warn("Missing EnhancedHtmlPage: " + absUrl);
+                this.tempUrls.add(absUrl);
+                continue;
             }
-            else {
-                String anchor = StringUtils.EMPTY;
-                if (StringUtils.isNotBlank(text)) {
-                    anchor = text;
-                }
-                if (StringUtils.isNotBlank(title) && title.length() > anchor.length()) {
-                    anchor = title;
+
+            String anchor = StringUtils.EMPTY;
+            if (StringUtils.isNotBlank(text)) {
+                anchor = text;
+            }
+            if (StringUtils.isNotBlank(title) && title.length() > anchor.length()) {
+                anchor = title;
+            }
+
+            if (StringUtils.isNotBlank(anchor)) {
+                Set<String> anchors = nextEnhancedHtmlPage.getAnchors();
+                if (anchors == null) {
+                    anchors = new HashSet<String>();
                 }
 
-                if (StringUtils.isNotBlank(anchor)) {
-                    Set<String> anchors = nextEnhancedHtmlPage.getAnchors();
-                    if (anchors == null) {
-                        anchors = new HashSet<String>();
-                    }
-
-                    anchors.add(anchor);
-                    nextEnhancedHtmlPage.setAnchors(anchors);
-                    this.enhancedHtmlPageDao.updateHtmlPage(nextEnhancedHtmlPage.getUrl(), nextEnhancedHtmlPage);
-                }
+                anchors.add(anchor);
+                nextEnhancedHtmlPage.setAnchors(anchors);
+                this.enhancedHtmlPageDao.updateHtmlPage(nextEnhancedHtmlPage.getUrl(), nextEnhancedHtmlPage);
             }
+
         }
     }
 }

@@ -9,7 +9,6 @@ import org.jsoup.nodes.Document;
 
 import com.gun3y.pagerank.common.HtmlToText;
 import com.gun3y.pagerank.entity.EnhancedHtmlPage;
-import com.gun3y.pagerank.entity.graph.GraphNode;
 import com.gun3y.pagerank.entity.html.HtmlData;
 import com.gun3y.pagerank.entity.html.HtmlPage;
 import com.gun3y.pagerank.entity.html.WebUrl;
@@ -17,14 +16,6 @@ import com.gun3y.pagerank.entity.html.WebUrl;
 public class BeanUtils {
 
     private static final Pattern URL_FILTER = Pattern.compile(HtmlUtils.REGEX_HTML_PAGES);
-
-    public static GraphNode newGraphNode(EnhancedHtmlPage enhancedHtmlPage) {
-        GraphNode graphNode = new GraphNode();
-        graphNode.setUrl(enhancedHtmlPage.getUrl());
-        graphNode.setPageRank(0.15d);
-
-        return graphNode;
-    }
 
     public static HtmlPage newHtmlPage(WebUrl webUrl) {
         HtmlPage htmlPage = new HtmlPage();

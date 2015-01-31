@@ -132,15 +132,5 @@ public class HtmlToText {
 
             return HtmlUtils.checkUrl(absUrl);
         }
-
-        //
-        // @Override
-        // public String toString() {
-        // String content = this.accum.toString();
-        // return content.replaceAll("(\r?\n)+", "#newline#").replaceAll("\\s+",
-        // " ")
-        // .replaceAll("(#newline#)*( )?(#newline#)( )?(#newline#)*",
-        // "\n").trim();
-        // }
     }
 }

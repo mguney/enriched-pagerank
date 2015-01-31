@@ -40,22 +40,17 @@ public class HtmlTitle implements Serializable {
         this.url = url;
     }
 
-    public String getUniqueId() {
-        return this.stemmedTitle + "$_$" + this.url;
-    }
-
     public boolean validate() {
         return StringUtils.isNotBlank(this.url) && StringUtils.isNotBlank(this.stemmedTitle);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(103, 27).append(this.stemmedTitle).append(this.url).toHashCode();
+        return new HashCodeBuilder(117, 27).append(this.stemmedTitle).append(this.url).toHashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-
         if (obj instanceof HtmlTitle) {
             final HtmlTitle other = (HtmlTitle) obj;
             return new EqualsBuilder().append(this.stemmedTitle, other.stemmedTitle).append(this.url, other.url).isEquals();

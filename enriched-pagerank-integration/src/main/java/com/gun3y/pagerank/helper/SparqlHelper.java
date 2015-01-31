@@ -1,15 +1,8 @@
 package com.gun3y.pagerank.helper;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 import com.gun3y.pagerank.entity.LinkType;
-import com.gun3y.pagerank.entity.graph.GraphNode;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.rdf.model.AnonId;
 
 public class SparqlHelper {
 
@@ -58,21 +51,25 @@ public class SparqlHelper {
                 return NodeFactory.createURI(OBJECT_PROP_EXPLICIT);
         }
     }
-
-    public static List<Triple> createGraphNodeTriples(GraphNode graphNode) {
-
-        List<Triple> triples = new ArrayList<Triple>();
-
-        if (graphNode == null) {
-            return triples;
-        }
-
-        Node gNode = NodeFactory.createAnon(new AnonId(KNOWLEDGE_BASE + "Page/" + UUID.randomUUID().toString()));
-        triples.add(new Triple(gNode, NodeFactory.createURI(OBJECT_PROP_TYPE), NodeFactory.createURI(CLASS_PAGE)));
-        triples.add(new Triple(gNode, NodeFactory.createURI(DATA_PROP_PAGE_RANK), NodeFactory.createLiteral(graphNode.getPageRank() + "")));
-        triples.add(new Triple(gNode, NodeFactory.createURI(DATA_PROP_URL), NodeFactory.createLiteral(graphNode.getUrl())));
-
-        return triples;
-    }
+    //
+    // public static List<Triple> createGraphNodeTriples(GraphNode graphNode) {
+    //
+    // List<Triple> triples = new ArrayList<Triple>();
+    //
+    // if (graphNode == null) {
+    // return triples;
+    // }
+    //
+    // Node gNode = NodeFactory.createAnon(new AnonId(KNOWLEDGE_BASE + "Page/" +
+    // UUID.randomUUID().toString()));
+    // triples.add(new Triple(gNode, NodeFactory.createURI(OBJECT_PROP_TYPE),
+    // NodeFactory.createURI(CLASS_PAGE)));
+    // triples.add(new Triple(gNode, NodeFactory.createURI(DATA_PROP_PAGE_RANK),
+    // NodeFactory.createLiteral(graphNode.getPageRank() + "")));
+    // triples.add(new Triple(gNode, NodeFactory.createURI(DATA_PROP_URL),
+    // NodeFactory.createLiteral(graphNode.getUrl())));
+    //
+    // return triples;
+    // }
 
 }
