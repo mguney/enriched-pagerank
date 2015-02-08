@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Stack;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jsoup.Jsoup;
 import org.jsoup.helper.StringUtil;
 import org.jsoup.nodes.Document;
@@ -21,8 +24,17 @@ import com.gun3y.pagerank.utils.HtmlUtils;
 
 public class HtmlToText {
 
+    private static final String ELKEY = "EPREL";
+
     public static void main(String[] args) {
-        String html = "<p>The <a href=\"/wiki/Kingdom_of_England\" title=\"Kingdom of England\">Kingdom of England</a> – which <a href=\"/wiki/Statute_of_Rhuddlan\" title=\"Statute of Rhuddlan\">after 1284</a> included Wales – was a <a href=\"/wiki/Sovereign_state\" title=\"Sovereign state\">sovereign state</a> until 1 May 1707, when the <a href=\"/wiki/Acts_of_Union_1707\" title=\"Acts of Union 1707\">Acts of Union</a> put into effect the terms agreed in the <a href=\"/wiki/Treaty_of_Union\" title=\"Treaty of Union\">Treaty of Union</a> the previous year, resulting in a political union with the <a href=\"/wiki/Kingdom_of_Scotland\" title=\"Kingdom of Scotland\">Kingdom of Scotland</a> to create the <a href=\"/wiki/Kingdom_of_Great_Britain\" title=\"Kingdom of Great Britain\">Kingdom of Great Britain</a>.<sup id=\"cite_ref-10\" class=\"reference\"><a href=\"#cite_note-10\"><span>[</span>9<span>]</span></a></sup><sup id=\"cite_ref-11\" class=\"reference\"><a href=\"#cite_note-11\"><span>[</span>10<span>]</span></a></sup> In 1801, Great Britain was united with the <a href=\"/wiki/Kingdom_of_Ireland\" title=\"Kingdom of Ireland\">Kingdom of Ireland</a> through another <a href=\"/wiki/Act_of_Union_1800\" title=\"Act of Union 1800\" class=\"mw-redirect\">Act of Union</a> to become the <a href=\"/wiki/United_Kingdom_of_Great_Britain_and_Ireland\" title=\"United Kingdom of Great Britain and Ireland\">United Kingdom of Great Britain and Ireland</a>. In 1922 the <a href=\"/wiki/Irish_Free_State\" title=\"Irish Free State\">Irish Free State</a> seceded from the United Kingdom, leading to the latter being <a href=\"/wiki/Royal_and_Parliamentary_Titles_Act_1927\" title=\"Royal and Parliamentary Titles Act 1927\">renamed</a> the United Kingdom of Great Britain and Northern Ireland.</p>";
+        System.out.println("[ 23 ]".matches("(\\[)(\\s)*([0-9]+)(\\s)*(\\])"));
+        System.out.println(" [ 23 ]".matches("(\\[)(\\s)*([0-9]+)(\\s)*(\\])"));
+        System.out.println("s[ 23 ]".matches("(\\[)(\\s)*([0-9]+)(\\s)*(\\])"));
+        System.out.println("[ sd23 ]".matches("(\\[)(\\s)*([0-9]+)(\\s)*(\\])"));
+        System.out.println("[23]".matches("(\\[)(\\s)*([0-9]+)(\\s)*(\\])"));
+        System.out.println("s[ asd ]".matches("(\\[)(\\s)*([0-9]+)(\\s)*(\\])"));
+
+        String html = "<p>The <a href=\"/wiki/Kingdom_of_England\" title=\"Kingdom of England\">Kingdom of England</a> – <a href=\"/wiki/Kingdom_of_England\">    </a>which <a href=\"/wiki/Statute_of_Rhuddlan\" title=\"Statute of Rhuddlan\">after 1284</a> included Wales – was a <a href=\"/wiki/Sovereign_state\" title=\"Sovereign state\">sovereign state</a> until 1 May 1707, when the <a href=\"/wiki/Acts_of_Union_1707\" title=\"Acts of Union 1707\">Acts of Union</a> put into effect the terms agreed in the <a href=\"/wiki/Treaty_of_Union\" title=\"Treaty of Union\">Treaty of Union</a> the previous year, resulting in a political union with the <a href=\"/wiki/Kingdom_of_Scotland\" title=\"Kingdom of Scotland\">Kingdom of Scotland</a> to create the <a href=\"/wiki/Kingdom_of_Great_Britain\" title=\"Kingdom of Great Britain\">Kingdom of Great Britain</a>.<sup id=\"cite_ref-10\" class=\"reference\"><a href=\"#cite_note-10\"><span>[</span>9<span>]</span></a></sup><sup id=\"cite_ref-11\" class=\"reference\"><a href=\"#cite_note-11\"><span>[</span>10<span>]</span></a></sup> In 1801, Great Britain was united with the <a href=\"/wiki/Kingdom_of_Ireland\" title=\"Kingdom of Ireland\">Kingdom of Ireland</a> through another <a href=\"/wiki/Act_of_Union_1800\" title=\"Act of Union 1800\" class=\"mw-redirect\">Act of Union</a> to become the <a href=\"/wiki/United_Kingdom_of_Great_Britain_and_Ireland\" title=\"United Kingdom of Great Britain and Ireland\">United Kingdom of Great Britain and Ireland</a>. In 1922 the <a href=\"/wiki/Irish_Free_State\" title=\"Irish Free State\">Irish Free State</a> seceded from the United Kingdom, leading to the latter being <a href=\"/wiki/Royal_and_Parliamentary_Titles_Act_1927\" title=\"Royal and Parliamentary Titles Act 1927\">renamed</a> the United Kingdom of Great Britain and Northern Ireland.</p>";
         String baseUrl = "http://en.wikipedia.org/";
         Document doc = Jsoup.parse(html, baseUrl);
 
@@ -30,7 +42,9 @@ public class HtmlToText {
         List<LineItem> lines = formatter.getLines(doc);
         for (LineItem lineItem : lines) {
             System.out.println(lineItem.line);
-            System.out.println(lineItem.urls);
+            for (Entry<String, Pair<String, String>> e : lineItem.urls.entrySet()) {
+                System.out.println(e);
+            }
         }
     }
 
@@ -54,9 +68,11 @@ public class HtmlToText {
     // the formatting rules, implemented in a breadth-first DOM traverse
     private class FormattingVisitor implements NodeVisitor {
 
+        int counter;
+
         List<LineItem> lines = new ArrayList<LineItem>();
 
-        Map<String, String> urlMap = new HashMap<String, String>();
+        Map<String, Pair<String, String>> urlMap = new HashMap<String, Pair<String, String>>();
 
         StringBuilder accLine = new StringBuilder();
 
@@ -76,11 +92,10 @@ public class HtmlToText {
                     && this.accLine.length() > 0) {
                 this.lines.add(new LineItem(this.accLine.toString().trim(), this.urlMap));
                 this.accLine = new StringBuilder();
-                this.urlMap = new HashMap<String, String>();
+                this.urlMap = new HashMap<String, Pair<String, String>>();
                 this.stack = new Stack<Integer>();
             }
             else if (this.checkUrl(node)) {
-                this.accLine.append("\"");
                 this.stack.push(this.accLine.length());
             }
         }
@@ -94,32 +109,32 @@ public class HtmlToText {
                     "th", "td", "tbody") && this.accLine.length() > 0) {
                 this.lines.add(new LineItem(this.accLine.toString().trim(), this.urlMap));
                 this.accLine = new StringBuilder();
-                this.urlMap = new HashMap<String, String>();
+                this.urlMap = new HashMap<String, Pair<String, String>>();
                 this.stack = new Stack<Integer>();
             }
             else if (this.checkUrl(node) && !this.stack.isEmpty()) {
-
                 Integer index = this.stack.pop();
 
-                if (index == this.accLine.length()) {
-                    this.accLine.replace(this.accLine.length() - 1, this.accLine.length(), "");
-                }
-                else {
+                if (index < this.accLine.length()) {
                     String absUrl = node.absUrl("href");
                     String linkText = this.accLine.substring(index).trim();
 
-                    if (linkText.length() < 2) {
-                        this.accLine.replace(index - 1, index, "");
-                    }
-                    else {
+                    if (this.validateText(linkText)) {
+                        String key = ELKEY + this.counter++;
 
-                        this.urlMap.put(linkText, absUrl);
-                        this.accLine.replace(this.accLine.length() - 1, this.accLine.length(), "");
-                        this.accLine.append("\" ");
+                        this.accLine.replace(index, this.accLine.length() - 1, key);
+
+                        this.urlMap.put(key, new MutablePair<String, String>(linkText, absUrl));
                     }
                 }
-
             }
+        }
+
+        private boolean validateText(String linkText) {
+            if (StringUtils.isBlank(linkText) || linkText.length() < 2) {
+                return false;
+            }
+            return !linkText.matches("(\\[)(\\s)*([0-9]+)(\\s)*(\\])");
         }
 
         private boolean checkUrl(Node node) {
