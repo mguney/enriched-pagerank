@@ -98,7 +98,7 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
 
     public static void main(String[] args) throws IOException {
         System.out.println(Calendar.getInstance().getTime());
-        SemanticLinkAnalyzer analyzer = new SemanticLinkAnalyzer(5);
+        SemanticLinkAnalyzer analyzer = new SemanticLinkAnalyzer(1);
 
         String html = FileUtils.readFileToString(new File(SemanticLinkAnalyzer.class.getClassLoader().getResource("wiki_sample.html")
                 .getPath()));
@@ -431,11 +431,6 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
                 LOGGER.debug("From " + pairWord.firstWord + " to " + pairWord.secondWord + "  edges ----> " + edges.toString());
             }
 
-            // List<Triple<GrammaticalRelation, IndexedWord,
-            // GrammaticalRelation>> verbs = new
-            // ArrayList<Triple<GrammaticalRelation, IndexedWord,
-            // GrammaticalRelation>>();
-
             Triple<GrammaticalRelation, IndexedWord, GrammaticalRelation> rootWord = null;
 
             for (int i = 0; i < edges.size(); i++) {
@@ -443,13 +438,6 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
 
                 if (edges.size() > (i + 1)) {
                     SemanticGraphEdge secondEdge = edges.get(i + 1);
-
-                    // Find verbs
-                    // if (firstEdge.getTarget().tag().contains("VB")) {
-                    // verbs.add(new Triple<GrammaticalRelation, IndexedWord,
-                    // GrammaticalRelation>(firstEdge.getRelation(), firstEdge
-                    // .getTarget(), secondEdge.getRelation()));
-                    // }
 
                     // Find root
                     if (firstEdge.getSource().equals(secondEdge.getSource()) && firstEdge.getSource().tag().contains("VB")) {
