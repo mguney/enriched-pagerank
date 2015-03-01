@@ -4,21 +4,19 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 public class LineItem implements Serializable {
 
     private static final long serialVersionUID = 4505341851671159100L;
 
-    Map<String, Pair<String, String>> urls = new HashMap<String, Pair<String, String>>();
+    Map<String, String> urls = new HashMap<String, String>();
 
     String line;
 
-    public Map<String, Pair<String, String>> getUrls() {
+    public Map<String, String> getUrls() {
         return this.urls;
     }
 
-    public void setUrls(Map<String, Pair<String, String>> urls) {
+    public void setUrls(Map<String, String> urls) {
         this.urls = urls;
     }
 
@@ -30,7 +28,7 @@ public class LineItem implements Serializable {
         this.line = line;
     }
 
-    public LineItem(String text, Map<String, Pair<String, String>> map) {
+    public LineItem(String text, Map<String, String> map) {
         this.line = text;
         this.urls = map;
     }

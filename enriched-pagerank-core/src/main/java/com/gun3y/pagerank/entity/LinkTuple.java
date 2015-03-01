@@ -1,35 +1,38 @@
 package com.gun3y.pagerank.entity;
 
-import java.io.Serializable;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.PrimaryKey;
-import com.sleepycat.persist.model.Relationship;
-import com.sleepycat.persist.model.SecondaryKey;
+import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
+@Table(name = "LINK_TUPLE", schema = "pagerank")
 public class LinkTuple implements Serializable, Comparable<LinkTuple> {
 
     private static final long serialVersionUID = -3980877700782161276L;
 
-    @PrimaryKey(sequence = "linkTupleSeq")
-    private Integer linkTupleId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "LT_ID")
+    private Integer id;
 
-    @SecondaryKey(relate = Relationship.MANY_TO_ONE)
+    @Column(name = "LT_FROM")
     private String from;
 
-    @SecondaryKey(relate = Relationship.MANY_TO_ONE)
+    @Column(name = "LT_TO")
     private String to;
 
-    @SecondaryKey(relate = Relationship.MANY_TO_ONE)
+    @Column(name = "LT_REL")
     private String rel;
 
-    @SecondaryKey(relate = Relationship.MANY_TO_ONE)
+    @Column(name = "LT_LINK_TYPE")
+    @Enumerated(EnumType.ORDINAL)
     private LinkType linkType;
+
+    @Column(name = "LT_COUNT_ID")
+    private Integer countId;
 
     public LinkTuple() {
         super();
@@ -85,12 +88,20 @@ public class LinkTuple implements Serializable, Comparable<LinkTuple> {
         this.linkType = linkType;
     }
 
-    public Integer getLinkTupleId() {
-        return this.linkTupleId;
+    public Integer getId() {
+        return this.id;
     }
 
-    public void setLinkTupleId(Integer linkTupleId) {
-        this.linkTupleId = linkTupleId;
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getCountId() {
+        return this.countId;
+    }
+
+    public void setCountId(Integer countId) {
+        this.countId = countId;
     }
 
     @Override

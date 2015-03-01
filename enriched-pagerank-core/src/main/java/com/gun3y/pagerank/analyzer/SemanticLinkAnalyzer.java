@@ -1,42 +1,16 @@
 package com.gun3y.pagerank.analyzer;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Vector;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-
 import com.gun3y.pagerank.common.HtmlToText;
 import com.gun3y.pagerank.common.LineItem;
 import com.gun3y.pagerank.entity.EnhancedHtmlPage;
 import com.gun3y.pagerank.entity.HtmlTitle;
 import com.gun3y.pagerank.entity.LinkTuple;
 import com.gun3y.pagerank.entity.LinkType;
-
+import com.gun3y.pagerank.utils.LangUtils;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
@@ -45,7 +19,25 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.CollapsedCCProcess
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
+import org.apache.commons.io.FileUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class SemanticLinkAnalyzer implements LinkAnalyzer {
 
@@ -82,7 +74,7 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
         this.counter = new AtomicInteger(numWorkers);
 
         Properties tokenProps = new Properties();
-        tokenProps.put("annotators", "tokenize, ssplit, pos");
+        tokenProps.put("annotators", "tokenize, ssplit, pos, lemma");
         this.tokenizer = new StanfordCoreNLP(tokenProps);
 
         this.workQueue = new LinkedBlockingQueue<LineItem>(this.workQueueSize);
@@ -108,7 +100,11 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
         HtmlToText formatter = new HtmlToText();
         List<LineItem> lines = formatter.getLines(doc);
 
-        List<LinkTuple> analyze = analyzer.analyze(lines);
+        Set<HtmlTitle> titleSet = new HashSet<HtmlTitle>();
+        titleSet.add(new HtmlTitle("England", "http://england"));
+        titleSet.add(new HtmlTitle("Wikipedia", "http://Wikipedia"));
+
+        List<LinkTuple> analyze = analyzer.analyze(lines, titleSet);
         System.out.println(Calendar.getInstance().getTime());
 
         for (LinkTuple linkTuple : analyze) {
@@ -122,15 +118,15 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
         System.out.println(Calendar.getInstance().getTime());
         SemanticLinkAnalyzer analyzer = new SemanticLinkAnalyzer(1);
 
-        String line = "NP1 has original text related to this article: NP2";
+        String line = "Wikisource has original text related to this article: England portal";
 
-        Map<String, Pair<String, String>> map = new HashMap<String, Pair<String, String>>();
-        map.put("NP1", new MutablePair<String, String>("Wikisource", "http://url1"));
-        map.put("NP2", new MutablePair<String, String>("England portal", "http://url2"));
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("Wikisource", "http://url1");
+        map.put("England portal", "http://url2");
 
         LineItem lineItem = new LineItem(line, map);
 
-        List<LinkTuple> analyze = analyzer.analyze(Arrays.asList(lineItem));
+        List<LinkTuple> analyze = analyzer.analyze(Arrays.asList(lineItem), Collections.emptySet());
         // List<LinkTuple> analyze = analyzer.analyze(lines);
         System.out.println(Calendar.getInstance().getTime());
 
@@ -144,19 +140,20 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
     @Override
     public synchronized List<LinkTuple> analyze(EnhancedHtmlPage ePage) {
         List<LineItem> lines = ePage.getLines();
-        return this.analyze(lines);
+        return this.analyze(lines, Collections.emptySet());
     }
 
     @Override
-    public synchronized List<LinkTuple> analyze(EnhancedHtmlPage ePage, HtmlTitle htmlTitle) {
-        return Collections.emptyList();
+    public synchronized List<LinkTuple> analyze(EnhancedHtmlPage ePage, Set<HtmlTitle> titleSet) {
+        List<LineItem> lines = ePage.getLines();
+        return this.analyze(lines, titleSet);
     }
 
     public void shutdown() {
         this.service.shutdownNow();
     }
 
-    private List<LinkTuple> analyze(List<LineItem> lines) {
+    private List<LinkTuple> analyze(List<LineItem> lines, Set<HtmlTitle> titleSet) {
 
         List<LinkTuple> retTuples = new ArrayList<LinkTuple>();
 
@@ -164,12 +161,12 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
             return retTuples;
         }
 
-        for (LineItem lineItem : lines) {
-            if (lineItem.getUrls().size() < 2) {
-                continue;
-            }
+        Map<String, String> titleMap = new HashMap<String, String>();
+        titleSet.stream().forEach(a -> titleMap.put(a.getStemmedTitle(), a.getUrl()));
 
-            List<LineItem> items = this.extractSentences(lineItem);
+        for (LineItem lineItem : lines) {
+
+            List<LineItem> items = this.extractSentences(lineItem, titleMap);
 
             for (LineItem item : items) {
 
@@ -201,7 +198,7 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
         return retTuples;
     }
 
-    private List<LineItem> extractSentences(LineItem lineItem) {
+    private List<LineItem> extractSentences(LineItem lineItem, Map<String, String> titleMap) {
         List<LineItem> items = new ArrayList<LineItem>();
 
         Annotation document = this.tokenizer.process(lineItem.getLine());
@@ -210,13 +207,21 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
         for (CoreMap sentence : sentences) {
 
             String sentenceText = sentence.get(TextAnnotation.class);
-            Map<String, Pair<String, String>> urls = new HashMap<String, Pair<String, String>>();
 
-            for (Entry<String, Pair<String, String>> entry : lineItem.getUrls().entrySet()) {
-                if (sentenceText.contains(entry.getKey())) {
-                    urls.put(entry.getKey(), entry.getValue());
+            Map<String, String> urls = new HashMap<String, String>();
+
+            List<Pair<String, String>> implicitUrls = this.findImplictUrls(sentence.get(TokensAnnotation.class), titleMap);
+
+            implicitUrls.stream().forEach(a -> {
+                if (sentenceText.contains(a.first)) {
+                    urls.put(a.first, a.second);
                 }
-            }
+            });
+            lineItem.getUrls().forEach((key, value) -> {
+                if (sentenceText.contains(key)) {
+                    urls.put(key, value);
+                }
+            });
 
             if (urls.size() > 1) {
                 items.add(new LineItem(sentenceText, urls));
@@ -224,6 +229,35 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
 
         }
         return items;
+    }
+
+    private List<Pair<String, String>> findImplictUrls(List<CoreLabel> tokens, Map<String, String> titleMap) {
+        List<Pair<String, String>> retList = new ArrayList<Pair<String, String>>();
+
+        if (tokens.size() < 2) {
+            return retList;
+        }
+
+        List<String> lemmaList = tokens.stream().map(a -> a.lemma()).collect(Collectors.toList());
+        List<String> textList = tokens.stream().map(a -> a.originalText()).collect(Collectors.toList());
+
+        for (Entry<String, String> titleEntry : titleMap.entrySet()) {
+            List<String> titleKeys = Arrays.asList(titleEntry.getKey().split(" "));
+            String titleUrl = titleEntry.getValue();
+
+            if (titleKeys.size() > textList.size()) {
+                continue;
+            }
+
+            int indexOfSubList = Collections.indexOfSubList(lemmaList, titleKeys);
+
+            if (indexOfSubList > -1) {
+                String titleName = LangUtils.joinList(textList.subList(indexOfSubList, indexOfSubList + titleKeys.size()));
+                retList.add(new Pair<String, String>(titleName, titleUrl));
+            }
+        }
+
+        return retList;
     }
 
     private static class PairWord {
@@ -289,13 +323,13 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
         }
 
         private void executeLineItem(LineItem lineItem) {
-            String sentenceText = this.buildSingleSentence(lineItem);
+            String sentenceText = lineItem.getLine();
             LOGGER.debug("######################");
             LOGGER.debug(sentenceText);
 
-            Map<String, Pair<String, String>> urlMap = lineItem.getUrls();
-            for (Entry<String, Pair<String, String>> entry : urlMap.entrySet()) {
-                LOGGER.debug(entry.getKey() + " -> " + entry.getValue().getKey() + " -> " + entry.getValue().getValue());
+            Map<String, String> urlMap = lineItem.getUrls();
+            for (Entry<String, String> entry : urlMap.entrySet()) {
+                LOGGER.debug(entry.getKey() + " -> " + entry.getValue());
             }
 
             List<PairWord> pairs = this.extractPairs(urlMap);
@@ -405,85 +439,205 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
 
         }
 
-        private String buildSingleSentence(LineItem lineItem) {
-            String text = new String(lineItem.getLine());
-
-            for (Entry<String, Pair<String, String>> entry : lineItem.getUrls().entrySet()) {
-                text = text.replace(entry.getKey(), entry.getValue().getKey());
-            }
-
-            return text;
-        }
-
         private PairWord extractSemanticTriple(SemanticGraph semanticGraph, PairWord pairWord) {
             if (pairWord.firstWord == null || pairWord.secondWord == null) {
                 return null;
             }
-            List<SemanticGraphEdge> edges = null;
-            boolean reverse = false;
-            if (pairWord.firstWord.beginPosition() > pairWord.secondWord.beginPosition()) {
-                reverse = true;
-                edges = semanticGraph.getShortestUndirectedPathEdges(pairWord.secondWord, pairWord.firstWord);
-                LOGGER.debug("From " + pairWord.secondWord + " to " + pairWord.firstWord + "  edges ----> " + edges.toString());
-            }
-            else {
-                edges = semanticGraph.getShortestUndirectedPathEdges(pairWord.firstWord, pairWord.secondWord);
-                LOGGER.debug("From " + pairWord.firstWord + " to " + pairWord.secondWord + "  edges ----> " + edges.toString());
-            }
+
+            PairWord accPairWord = this.newPairWord(pairWord);
+
+            List<SemanticGraphEdge> edges = semanticGraph.getShortestUndirectedPathEdges(accPairWord.firstWord, accPairWord.secondWord);
+            LOGGER.debug("From " + accPairWord.firstWord + " to " + accPairWord.secondWord + "  edges ----> " + edges.toString());
 
             Triple<GrammaticalRelation, IndexedWord, GrammaticalRelation> rootWord = null;
+
+            if (edges == null || edges.size() < 2) {
+                return null;
+            }
+
+            SemanticGraphEdge fEdge = edges.get(0);
+
+            if (fEdge.getSource().equals(accPairWord.firstWord)) {
+                // Root yok. ama ilk gelen VB'yi kullanabiliriz belki
+                rootWord = null;
+            } else if (fEdge.getTarget().equals(accPairWord.firstWord)) {
+                // Root var.
+                rootWord = this.findRootWord(accPairWord, edges);
+            }
+
+            if (rootWord == null) {
+                return null;
+            }
+
+            return this.createSemanticLink(rootWord, accPairWord);
+        }
+
+        private Triple<GrammaticalRelation, IndexedWord, GrammaticalRelation> findRootWord(PairWord accPairWord,
+                                                                                           List<SemanticGraphEdge> edges) {
+
+            Triple<GrammaticalRelation, IndexedWord, GrammaticalRelation> rootWord = null;
+
+            List<Pair<IndexedWord, GrammaticalRelation>> subjWords = new ArrayList<Pair<IndexedWord, GrammaticalRelation>>();
+            List<Pair<IndexedWord, GrammaticalRelation>> objWords = new ArrayList<Pair<IndexedWord, GrammaticalRelation>>();
+
+            boolean firstAccessToRoot = true;
 
             for (int i = 0; i < edges.size(); i++) {
                 SemanticGraphEdge firstEdge = edges.get(i);
 
                 if (edges.size() > (i + 1)) {
                     SemanticGraphEdge secondEdge = edges.get(i + 1);
-
                     // Find root
-                    if (firstEdge.getSource().equals(secondEdge.getSource()) && firstEdge.getSource().tag().contains("VB")) {
+                    if (firstEdge.getSource().equals(secondEdge.getSource())) {
                         rootWord = new Triple<GrammaticalRelation, IndexedWord, GrammaticalRelation>(firstEdge.getRelation(),
                                 firstEdge.getSource(), secondEdge.getRelation());
-
                     }
+                }
 
+                if (rootWord == null) {
+                    subjWords.add(new Pair<IndexedWord, GrammaticalRelation>(firstEdge.getTarget(), firstEdge.getRelation()));
+                } else if (firstEdge.getSource().equals(rootWord.second)) {
+                    if (firstAccessToRoot) {
+                        subjWords.add(new Pair<IndexedWord, GrammaticalRelation>(firstEdge.getTarget(), firstEdge.getRelation()));
+                        firstAccessToRoot = false;
+                    } else {
+                        objWords.add(new Pair<IndexedWord, GrammaticalRelation>(firstEdge.getTarget(), firstEdge.getRelation()));
+                    }
+                } else {
+                    objWords.add(new Pair<IndexedWord, GrammaticalRelation>(firstEdge.getTarget(), firstEdge.getRelation()));
                 }
             }
 
-            // if (rootWord == null && !verbs.isEmpty()) {
-            // rootWord = verbs.get(0);
-            // }
-
-            if (rootWord != null) {
-                return this.createSemanticLink(rootWord, pairWord, reverse);
+            if (rootWord != null && !rootWord.second.tag().contains("VB")) {
+                return null;
             }
 
-            // if (!edges.isEmpty()) {
-            //
-            // PairWord pWord = new PairWord();
-            // pWord.first = pairWord.first;
-            // pWord.firstUrl = pairWord.firstUrl;
-            // pWord.second = pairWord.second;
-            // pWord.secondUrl = pairWord.secondUrl;
-            // pWord.predicate = IN_SAME_SENTENCE;
-            // return pWord;
-            // }
+            boolean allCheck = true;
+            if (rootWord.first.getShortName().contains("dobj")) {
+                allCheck &= this.checkObjs(subjWords, accPairWord.firstWord);
+                allCheck &= this.checkSubjs(objWords, accPairWord.secondWord);
+            } else {
+                allCheck &= this.checkSubjs(subjWords, accPairWord.firstWord);
+                allCheck &= this.checkObjs(objWords, accPairWord.secondWord);
+            }
 
-            return null;
+            if (!allCheck) {
+                return null;
+            }
+            return rootWord;
         }
 
-        private PairWord createSemanticLink(Triple<GrammaticalRelation, IndexedWord, GrammaticalRelation> rootWord, PairWord pairWord,
-                boolean reverse) {
+        private boolean checkObjs(List<Pair<IndexedWord, GrammaticalRelation>> objWords, IndexedWord secondWord) {
+            boolean includesNObj = false;
+            boolean includesVB = false;
+            boolean includesConj = false;
+            boolean includesPrep = false;
+
+            // conj'lara ve prep'lere dikkat et
+
+            for (Pair<IndexedWord, GrammaticalRelation> objPair : objWords) {
+                IndexedWord word = objPair.first;
+                GrammaticalRelation rel = objPair.second;
+
+                if (rel.getShortName().contains("dobj")) {
+                    includesNObj = true;
+                }
+
+                if (secondWord.equals(word)) {
+                    continue;
+                }
+
+                if (word.tag().contains("VB")) {
+                    includesVB = true;
+                }
+
+                if (rel.getShortName().contains("conj")) {
+                    includesConj = true;
+                }
+
+                if (rel.getShortName().contains("prep")) {
+                    includesPrep = true;
+                }
+
+            }
+
+            return includesNObj && !includesVB && !includesConj && !includesPrep;
+        }
+
+        private boolean checkSubjs(List<Pair<IndexedWord, GrammaticalRelation>> subjWords, IndexedWord firstWord) {
+
+            boolean includesNSubj = false;
+            boolean includesVB = false;
+            boolean includesConj = false;
+            boolean includesPrep = false;
+
+            // conj'lara ve prep'lere dikkat et
+
+            for (Pair<IndexedWord, GrammaticalRelation> subjPair : subjWords) {
+                IndexedWord word = subjPair.first;
+                GrammaticalRelation rel = subjPair.second;
+
+                if (rel.getShortName().contains("nsubj")) {
+                    includesNSubj = true;
+                }
+
+                if (firstWord.equals(word)) {
+                    continue;
+                }
+
+                if (word.tag().contains("VB")) {
+                    includesVB = true;
+                }
+
+                if (rel.getShortName().contains("conj")) {
+                    includesConj = true;
+                }
+
+                if (rel.getShortName().contains("prep")) {
+                    includesPrep = true;
+                }
+
+            }
+
+            return includesNSubj && !includesVB && !includesConj && !includesPrep;
+        }
+
+        private PairWord newPairWord(PairWord pairWord) {
+            PairWord accPairWord = new PairWord();
+            if (pairWord.firstWord.beginPosition() > pairWord.secondWord.beginPosition()) {
+                accPairWord.first = pairWord.second;
+                accPairWord.firstUrl = pairWord.secondUrl;
+                accPairWord.firstWord = pairWord.secondWord;
+
+                accPairWord.second = pairWord.first;
+                accPairWord.secondUrl = pairWord.firstUrl;
+                accPairWord.secondWord = pairWord.firstWord;
+            } else {
+                accPairWord.first = pairWord.first;
+                accPairWord.firstUrl = pairWord.firstUrl;
+                accPairWord.firstWord = pairWord.firstWord;
+
+                accPairWord.second = pairWord.second;
+                accPairWord.secondUrl = pairWord.secondUrl;
+                accPairWord.secondWord = pairWord.secondWord;
+            }
+
+            return accPairWord;
+        }
+
+        private PairWord createSemanticLink(Triple<GrammaticalRelation, IndexedWord, GrammaticalRelation> rootWord, PairWord pairWord) {
             PairWord retWord = new PairWord();
             String firstRel = rootWord.first().getShortName();
             String secondRel = rootWord.third.getShortName();
 
-            boolean direction = !reverse;
+            boolean direction = true;
 
-            if (firstRel.equals("nsubjpass")) {
+            if (firstRel.equals("nsubjpass") || secondRel.equals("nsubj") || firstRel.contains("dobj")) {
                 direction = false;
             }
-            else if (secondRel.equals("nsubj")) {
-                direction = false;
+
+            if (firstRel.equals("nsubj") || secondRel.contains("dobj")) {
+                direction = true;
             }
 
             if (direction) {
@@ -504,29 +658,23 @@ public class SemanticLinkAnalyzer implements LinkAnalyzer {
             return retWord;
         }
 
-        private List<PairWord> extractPairs(Map<String, Pair<String, String>> urls) {
+        private List<PairWord> extractPairs(Map<String, String> urls) {
             List<PairWord> retList = new ArrayList<PairWord>();
 
-            if (urls.isEmpty()) {
+            if (urls.size() < 2) {
                 return retList;
             }
 
-            List<Pair<String, String>> accList = new ArrayList<Pair<String, String>>();
-            for (Entry<String, Pair<String, String>> entry : urls.entrySet()) {
-                accList.add(entry.getValue());
-            }
-
-            if (accList.size() < 2) {
-                return retList;
-            }
+            List<Pair<String, String>> accList = urls.entrySet().stream().map(a -> new Pair<String, String>(a.getKey(), a.getValue()))
+                    .collect(Collectors.toList());
 
             for (int i = 0; i < accList.size(); i++) {
                 for (int j = i + 1; j < accList.size(); j++) {
                     PairWord pairWord = new PairWord();
-                    pairWord.first = accList.get(i).getKey();
-                    pairWord.firstUrl = accList.get(i).getValue();
-                    pairWord.second = accList.get(j).getKey();
-                    pairWord.secondUrl = accList.get(j).getValue();
+                    pairWord.first = accList.get(i).first;
+                    pairWord.firstUrl = accList.get(i).second;
+                    pairWord.second = accList.get(j).first;
+                    pairWord.secondUrl = accList.get(j).second;
 
                     retList.add(pairWord);
                 }

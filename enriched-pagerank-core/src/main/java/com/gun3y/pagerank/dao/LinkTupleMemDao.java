@@ -1,26 +1,16 @@
 package com.gun3y.pagerank.dao;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.StopWatch;
-
+import com.gun3y.pagerank.entity.HtmlTitle;
 import com.gun3y.pagerank.entity.LinkTuple;
 import com.gun3y.pagerank.entity.LinkType;
 import com.gun3y.pagerank.utils.DBUtils;
 import com.sleepycat.je.Environment;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
+
+import java.io.File;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class LinkTupleMemDao {
 
@@ -261,6 +251,18 @@ public class LinkTupleMemDao {
 
     }
 
+    public Set<HtmlTitle> findAllTitles() {
+        if (this.implicitLinks.isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        return this.implicitLinks.stream().map(a -> new HtmlTitle(a.getRel(), a.getTo())).collect(Collectors.<HtmlTitle>toSet());
+    }
+
+    public Set<String> findAllVerbs() {
+        return this.findAllTitles(LinkType.SemanticLink);
+    }
+
     private Set<String> findRemovalTitles(LinkType linkType, Set<String> titleSet) {
 
         Set<String> removeSet = new HashSet<String>();
@@ -323,22 +325,14 @@ public class LinkTupleMemDao {
         if (linkType == null || minOccurs < 1) {
             return -1;
         }
-        Set<LinkTuple> removeList = new HashSet<LinkTuple>();
-        Set<Entry<LinkTuple, Integer>> entrySet = this.linkTupleCountMap.entrySet();
-        for (Entry<LinkTuple, Integer> entry : entrySet) {
-            LinkTuple key = entry.getKey();
-            Integer value = entry.getValue();
 
-            if (value < minOccurs && key.getLinkType() == linkType) {
-                removeList.add(key);
-            }
-        }
+        Set<LinkTuple> removeList = this.linkTupleCountMap.entrySet().parallelStream()
+                .filter(a -> a.getKey().getLinkType() == linkType && a.getValue() < minOccurs).map(a -> a.getKey())
+                .collect(Collectors.toSet());
 
         int count = this.count(linkType);
 
-        for (LinkTuple key : removeList) {
-            this.linkTupleCountMap.remove(key);
-        }
+        removeList.forEach(a -> this.linkTupleCountMap.remove(a));
 
         this.removeLinkTuple(removeList, linkType);
 

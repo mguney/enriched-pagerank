@@ -1,22 +1,21 @@
 package com.gun3y.pagerank.analyzer;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.StopWatch;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.gun3y.pagerank.dao.EnhancedHtmlPageDao;
 import com.gun3y.pagerank.dao.HtmlTitleDao;
-import com.gun3y.pagerank.dao.LinkTupleMemDao;
+import com.gun3y.pagerank.dao.LinkTupleDao;
 import com.gun3y.pagerank.entity.EnhancedHtmlPage;
 import com.gun3y.pagerank.entity.HtmlTitle;
 import com.gun3y.pagerank.entity.LinkTuple;
 import com.gun3y.pagerank.entity.LinkType;
 import com.gun3y.pagerank.utils.LangUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 public class LinkAnalysisManager {
 
@@ -28,7 +27,7 @@ public class LinkAnalysisManager {
 
     private EnhancedHtmlPageDao htmlPageDao;
 
-    private LinkTupleMemDao linkTupleDao;
+    private LinkTupleDao linkTupleDao;
 
     private HtmlTitleDao htmlTitleDao;
 
@@ -38,7 +37,7 @@ public class LinkAnalysisManager {
 
     private SemanticLinkAnalyzer semanticLinkAnalyzer;
 
-    public LinkAnalysisManager(EnhancedHtmlPageDao htmlPageDao, LinkTupleMemDao linkTupleDao, HtmlTitleDao htmlTitleDao) {
+    public LinkAnalysisManager(EnhancedHtmlPageDao htmlPageDao, LinkTupleDao linkTupleDao, HtmlTitleDao htmlTitleDao) {
         super();
         this.htmlPageDao = htmlPageDao;
         this.linkTupleDao = linkTupleDao;
@@ -46,7 +45,7 @@ public class LinkAnalysisManager {
 
         this.explicitLinkAnalyzer = new ExplicitLinkAnalyzer();
         this.implicitLinkAnalyzer = new ImplicitLinkAnalyzer();
-        this.semanticLinkAnalyzer = new SemanticLinkAnalyzer(3);
+        this.semanticLinkAnalyzer = new SemanticLinkAnalyzer(10);
     }
 
     public void analyze() {
@@ -63,6 +62,8 @@ public class LinkAnalysisManager {
 
         this.analyzeSemanticLinks();
 
+        this.semanticLinkAnalyzer.shutdown();
+
         LOGGER.info("Link Analysis has ended in {}ms", pageTimer.getTime());
     }
 
@@ -70,29 +71,25 @@ public class LinkAnalysisManager {
         StopWatch pageTimer = new StopWatch();
 
         Iterator<EnhancedHtmlPage> ePageIterator = this.htmlPageDao.getHtmlPageIterator();
+
+        Set<HtmlTitle> uniqueTitles = this.linkTupleDao.findAllTitles();
+
         while (ePageIterator.hasNext()) {
             EnhancedHtmlPage ePage = ePageIterator.next();
 
             pageTimer.reset();
             pageTimer.start();
-            List<LinkTuple> semanticTuples = this.semanticLinkAnalyzer.analyze(ePage);
+            List<LinkTuple> semanticTuples = this.semanticLinkAnalyzer.analyze(ePage, uniqueTitles);
             this.linkTupleDao.addLinkTuple(semanticTuples);
             pageTimer.stop();
             LOGGER.info("{}: Semantic Links: {} Time: {}", ePage.getUrl(), semanticTuples.size(), pageTimer.getTime());
 
-            // Iterator<HtmlTitle> htmlTitleIterator =
-            // this.htmlTitleDao.getHtmlTitleIterator();
-            // while (htmlTitleIterator.hasNext()) {
-            // HtmlTitle htmlTitle = htmlTitleIterator.next();
-            //
-            //
-            // }
         }
 
         LOGGER.info("Filtering semantic links");
         pageTimer.reset();
         pageTimer.start();
-        int minCountFilter = this.linkTupleDao.applyMinCountFilter(LinkType.SemanticLink, MIN_LINK_OCCURS);
+        long minCountFilter = this.linkTupleDao.applyMinCountFilter(LinkType.SemanticLink, MIN_LINK_OCCURS);
         pageTimer.stop();
         LOGGER.info("MinimumCount filter has been applied. {} links removed in {}ms", minCountFilter, pageTimer.getTime());
         LOGGER.info("SemanticLinks (Total: {}) has been filtered", this.linkTupleDao.count(LinkType.SemanticLink));
@@ -105,17 +102,10 @@ public class LinkAnalysisManager {
         while (ePageIterator.hasNext()) {
             EnhancedHtmlPage ePage = ePageIterator.next();
 
-            int totalLinks = 0;
-            Iterator<HtmlTitle> htmlTitleIterator = this.htmlTitleDao.getHtmlTitleIterator();
-            while (htmlTitleIterator.hasNext()) {
-                HtmlTitle htmlTitle = htmlTitleIterator.next();
+            List<LinkTuple> implicitTuples = this.implicitLinkAnalyzer.analyze(ePage, this.htmlTitleDao.getHtmlTitleSet());
+            this.linkTupleDao.addLinkTuple(implicitTuples);
 
-                List<LinkTuple> implicitTuples = this.implicitLinkAnalyzer.analyze(ePage, htmlTitle);
-                this.linkTupleDao.addLinkTuple(implicitTuples);
-
-                totalLinks += implicitTuples.size();
-            }
-            LOGGER.info("{}: Implicit Links: {}", ePage.getUrl(), totalLinks);
+            LOGGER.info("{}: Implicit Links: {}", ePage.getUrl(), implicitTuples.size());
         }
         pageTimer.stop();
         LOGGER.info("ImplicitLinks (Total: {}) has been created in {}ms", this.linkTupleDao.count(LinkType.ImplicitLink),
@@ -124,13 +114,13 @@ public class LinkAnalysisManager {
         LOGGER.info("Filtering implicit links");
         pageTimer.reset();
         pageTimer.start();
-        int minCountFilter = this.linkTupleDao.applyMinCountFilter(LinkType.ImplicitLink, MIN_LINK_OCCURS);
+        long minCountFilter = this.linkTupleDao.applyMinCountFilter(LinkType.ImplicitLink, MIN_LINK_OCCURS);
         pageTimer.stop();
         LOGGER.info("MinimumCount filter has been applied. {} links removed in {}ms", minCountFilter, pageTimer.getTime());
 
         pageTimer.reset();
         pageTimer.start();
-        int sameUrlFilter = this.linkTupleDao.applySameUrlFilter(LinkType.ImplicitLink);
+        long sameUrlFilter = this.linkTupleDao.applySameUrlFilter(LinkType.ImplicitLink);
         pageTimer.stop();
         LOGGER.info("SameURL filter has been applied. {} links removed in {}ms", sameUrlFilter, pageTimer.getTime());
         LOGGER.info("ImplicitLinks (Total: {}) has been filtered", this.linkTupleDao.count(LinkType.ImplicitLink));

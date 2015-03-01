@@ -1,16 +1,8 @@
 package com.gun3y.pagerank.common;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Stack;
-
+import com.gun3y.pagerank.utils.HtmlUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.jsoup.Jsoup;
 import org.jsoup.helper.StringUtil;
 import org.jsoup.nodes.Document;
@@ -20,11 +12,10 @@ import org.jsoup.nodes.TextNode;
 import org.jsoup.select.NodeTraversor;
 import org.jsoup.select.NodeVisitor;
 
-import com.gun3y.pagerank.utils.HtmlUtils;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class HtmlToText {
-
-    private static final String ELKEY = "EPREL";
 
     public static void main(String[] args) {
         System.out.println("[ 23 ]".matches("(\\[)(\\s)*([0-9]+)(\\s)*(\\])"));
@@ -42,7 +33,7 @@ public class HtmlToText {
         List<LineItem> lines = formatter.getLines(doc);
         for (LineItem lineItem : lines) {
             System.out.println(lineItem.line);
-            for (Entry<String, Pair<String, String>> e : lineItem.urls.entrySet()) {
+            for (Entry<String, String> e : lineItem.urls.entrySet()) {
                 System.out.println(e);
             }
         }
@@ -68,11 +59,9 @@ public class HtmlToText {
     // the formatting rules, implemented in a breadth-first DOM traverse
     private class FormattingVisitor implements NodeVisitor {
 
-        int counter;
-
         List<LineItem> lines = new ArrayList<LineItem>();
 
-        Map<String, Pair<String, String>> urlMap = new HashMap<String, Pair<String, String>>();
+        Map<String, String> urlMap = new HashMap<String, String>();
 
         StringBuilder accLine = new StringBuilder();
 
@@ -92,7 +81,7 @@ public class HtmlToText {
                     && this.accLine.length() > 0) {
                 this.lines.add(new LineItem(this.accLine.toString().trim(), this.urlMap));
                 this.accLine = new StringBuilder();
-                this.urlMap = new HashMap<String, Pair<String, String>>();
+                this.urlMap = new HashMap<String, String>();
                 this.stack = new Stack<Integer>();
             }
             else if (this.checkUrl(node)) {
@@ -109,7 +98,7 @@ public class HtmlToText {
                     "th", "td", "tbody") && this.accLine.length() > 0) {
                 this.lines.add(new LineItem(this.accLine.toString().trim(), this.urlMap));
                 this.accLine = new StringBuilder();
-                this.urlMap = new HashMap<String, Pair<String, String>>();
+                this.urlMap = new HashMap<String, String>();
                 this.stack = new Stack<Integer>();
             }
             else if (this.checkUrl(node) && !this.stack.isEmpty()) {
@@ -120,11 +109,7 @@ public class HtmlToText {
                     String linkText = this.accLine.substring(index).trim();
 
                     if (this.validateText(linkText)) {
-                        String key = ELKEY + this.counter++;
-
-                        this.accLine.replace(index, this.accLine.length() - 1, key);
-
-                        this.urlMap.put(key, new MutablePair<String, String>(linkText, absUrl));
+                        this.urlMap.put(linkText, absUrl);
                     }
                 }
             }

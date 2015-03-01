@@ -1,16 +1,15 @@
 package com.gun3y.pagerank.analyzer;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.gun3y.pagerank.entity.EnhancedHtmlPage;
 import com.gun3y.pagerank.entity.HtmlTitle;
 import com.gun3y.pagerank.entity.LinkTuple;
 import com.gun3y.pagerank.entity.LinkType;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 public class ExplicitLinkAnalyzer implements LinkAnalyzer {
 
@@ -36,7 +35,7 @@ public class ExplicitLinkAnalyzer implements LinkAnalyzer {
     }
 
     @Override
-    public List<LinkTuple> analyze(EnhancedHtmlPage ePage, HtmlTitle htmlTitle) {
+    public List<LinkTuple> analyze(EnhancedHtmlPage ePage, Set<HtmlTitle> titleSet) {
         return Collections.emptyList();
     }
 }

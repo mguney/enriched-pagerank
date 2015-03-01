@@ -1,17 +1,27 @@
 package com.gun3y.pagerank.entity;
 
-import java.io.Serializable;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.io.Serializable;
+
+@Entity
+@Table(name = "HTML_TITLE", schema = "pagerank")
 public class HtmlTitle implements Serializable {
 
     private static final long serialVersionUID = 5620008418277465565L;
 
+    @Id
+    @Column(name = "HT_TITLE")
     private String stemmedTitle;
 
+    @Id
+    @Column(name = "HT_URL")
     private String url;
 
     public HtmlTitle() {

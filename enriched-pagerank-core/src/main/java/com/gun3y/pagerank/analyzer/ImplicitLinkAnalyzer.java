@@ -1,23 +1,23 @@
 package com.gun3y.pagerank.analyzer;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.gun3y.pagerank.entity.EnhancedHtmlPage;
 import com.gun3y.pagerank.entity.HtmlTitle;
 import com.gun3y.pagerank.entity.LinkTuple;
 import com.gun3y.pagerank.entity.LinkType;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 public class ImplicitLinkAnalyzer implements LinkAnalyzer {
 
     @Override
-    public List<LinkTuple> analyze(EnhancedHtmlPage ePage, HtmlTitle htmlTitle) {
+    public List<LinkTuple> analyze(EnhancedHtmlPage ePage, Set<HtmlTitle> titleSet) {
         List<LinkTuple> tuples = new ArrayList<LinkTuple>();
 
-        if (ePage == null || htmlTitle == null || !htmlTitle.validate() || ePage.getUrl().equals(htmlTitle.getUrl())) {
+        if (ePage == null || titleSet == null || titleSet.isEmpty()) {
             return tuples;
         }
 
@@ -26,10 +26,16 @@ public class ImplicitLinkAnalyzer implements LinkAnalyzer {
             return tuples;
         }
 
-        int countMatches = StringUtils.countMatches(stemmedText, htmlTitle.getStemmedTitle());
-        while (countMatches > 0) {
-            tuples.add(new LinkTuple(ePage.getUrl(), LinkType.ImplicitLink, htmlTitle.getUrl(), htmlTitle.getStemmedTitle()));
-            countMatches--;
+        for (HtmlTitle htmlTitle : titleSet) {
+            if (!htmlTitle.validate() || ePage.getUrl().equals(htmlTitle.getUrl())) {
+                continue;
+            }
+
+            int countMatches = StringUtils.countMatches(stemmedText, htmlTitle.getStemmedTitle());
+            while (countMatches > 0) {
+                tuples.add(new LinkTuple(ePage.getUrl(), LinkType.ImplicitLink, htmlTitle.getUrl(), htmlTitle.getStemmedTitle()));
+                countMatches--;
+            }
         }
 
         return tuples;

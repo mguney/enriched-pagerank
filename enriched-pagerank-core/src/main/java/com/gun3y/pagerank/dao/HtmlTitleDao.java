@@ -1,13 +1,12 @@
 package com.gun3y.pagerank.dao;
 
+import com.gun3y.pagerank.entity.HtmlTitle;
+import com.sleepycat.je.Environment;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.gun3y.pagerank.entity.HtmlTitle;
-import com.sleepycat.je.Environment;
 
 public class HtmlTitleDao {
 
@@ -27,6 +26,10 @@ public class HtmlTitleDao {
 
     public Iterator<HtmlTitle> getHtmlTitleIterator() {
         return this.htmlTitleSet.iterator();
+    }
+
+    public Set<HtmlTitle> getHtmlTitleSet() {
+        return this.htmlTitleSet;
     }
 
     public int count() {
