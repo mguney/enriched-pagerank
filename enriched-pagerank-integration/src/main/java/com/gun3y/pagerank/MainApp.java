@@ -15,6 +15,7 @@ import com.gun3y.pagerank.aggregator.HtmlAggregator;
 import com.gun3y.pagerank.analyzer.ExplicitLinkAnalyzer;
 import com.gun3y.pagerank.analyzer.ImplicitLinkAnalyzer;
 import com.gun3y.pagerank.analyzer.SemanticLinkAnalyzer;
+import com.gun3y.pagerank.crawler.BasicCrawlController;
 import com.gun3y.pagerank.dao.EnhancedHtmlPageDao;
 import com.gun3y.pagerank.dao.HtmlTitleDao;
 import com.gun3y.pagerank.dao.LinkTupleDao;
@@ -28,7 +29,7 @@ public class MainApp {
     private static final Logger LOGGER = LoggerFactory.getLogger(MainApp.class);
 
     public enum OP {
-        Explicit, Implicit, Semantic, All, EnhanceHtml, Test
+        Explicit, Implicit, Semantic, All, EnhanceHtml, Test, Crawl
     }
 
     @Option(name = "-data-html", usage = "data path for html")
@@ -42,6 +43,9 @@ public class MainApp {
 
     @Option(name = "-thread", usage = "thread size")
     private int thread = 5;
+
+    @Option(name = "-seed", usage = "seed list")
+    private File seedFile = new File(".");
 
     public static void main(String[] args) throws IOException {
         MainApp app = new MainApp();
@@ -68,6 +72,12 @@ public class MainApp {
             System.out.println("Data-Html: " + this.dataPathHtml);
             System.out.println("OP       : " + this.op);
             System.out.println("Thread   : " + this.thread);
+            System.out.println("SeedFile : " + this.seedFile.getAbsolutePath());
+
+            if (this.op == OP.Crawl) {
+                DBUtils.deleteFolderContents(new File(this.dataPathHtml));
+                LOGGER.info("DB Path for Html has been cleaned");
+            }
 
             Environment envHtml = DBUtils.newEnvironment(this.dataPathHtml);
 
@@ -123,6 +133,9 @@ public class MainApp {
                     break;
                 case Test:
                     System.out.println("Test");
+                    break;
+                case Crawl:
+                    BasicCrawlController.startCrawler(this.seedFile, htmlPageDao);
                     break;
             }
 

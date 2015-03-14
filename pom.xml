@@ -7,13 +7,11 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<crawler4j.version>4.1</crawler4j.version>
-		<lucene.version>5.0.0</lucene.version>
 		<stanford.version>3.5.1</stanford.version>
 		<jena.version>2.12.1</jena.version>
 		<hibernate.version>4.3.8.Final</hibernate.version>
 	</properties>
 	<modules>
-		<module>enriched-pagerank-crawler</module>
 		<module>enriched-pagerank-core</module>
 		<module>enriched-pagerank-web</module>
 		<module>enriched-pagerank-integration</module>
@@ -52,11 +50,6 @@
 				<version>${crawler4j.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.google.code.gson</groupId>
-				<artifactId>gson</artifactId>
-				<version>2.3</version>
-			</dependency>
-			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
 				<version>2.4</version>
@@ -90,11 +83,6 @@
 				<groupId>com.thoughtworks.proxytoys</groupId>
 				<artifactId>proxytoys</artifactId>
 				<version>1.0</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-analyzers-common</artifactId>
-				<version>${lucene.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>edu.stanford.nlp</groupId>
@@ -131,6 +119,11 @@
 				<groupId>args4j</groupId>
 				<artifactId>args4j</artifactId>
 				<version>2.0.29</version>
+			</dependency>
+			<dependency>
+				<groupId>xml-apis</groupId>
+				<artifactId>xml-apis</artifactId>
+				<version>1.4.01</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

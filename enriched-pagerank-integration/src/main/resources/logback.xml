@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<property name="LOG_HOME" value="logs" />
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%date{HH:mm:ss} %-5level [%thread] - [%logger{0}]- %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+	<appender name="FILE_THREAD" class="ch.qos.logback.classic.sift.SiftingAppender">
+		<discriminator>
+			<key>logFileName</key>
+			<defaultValue>thread0</defaultValue>
+		</discriminator>
+		<sift>
+			<!-- A standard RollingFileAppender, the log file is based on 'logFileName' at runtime -->
+			<appender name="FILE-${logFileName}" class="ch.qos.logback.core.rolling.RollingFileAppender">
+				<file>${LOG_HOME}/worker/link-analyzer-${logFileName}.log</file>
+				<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+					<!-- daily rollover -->
+					<fileNamePattern>${LOG_HOME}/worker/rolls/link-analyzer-${logFileName}-%d{yyyy-MM-dd}.log</fileNamePattern>
+					<TimeBasedFileNamingAndTriggeringPolicy class="com.gun3y.pagerank.log.StartupTimeBasedTriggeringPolicy" />
+					<!-- keep 30 days' worth of history -->
+					<maxHistory>30</maxHistory>
+				</rollingPolicy>
+				<encoder>
+					<pattern>%msg%n</pattern>
+				</encoder>
+			</appender>
+		</sift>
+	</appender>
+	<appender name="FILE_DETAIL_ANALYZER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_HOME}/link-analyzer-detail.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover -->
+			<fileNamePattern>${LOG_HOME}/rolls/link-analyzer-detail.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<!-- keep 30 days' worth of history -->
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%msg%n</pattern>
+		</encoder>
+	</appender>
+	<appender name="FILE_ANALYZER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_HOME}/link-analyzer.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover -->
+			<fileNamePattern>${LOG_HOME}/rolls/link-analyzer.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<!-- keep 30 days' worth of history -->
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%msg%n</pattern>
+		</encoder>
+	</appender>
+	<appender name="FILE_CRAWLER" class="ch.qos.logback.core.FileAppender">
+		<file>${LOG_HOME}/crawler.log</file>
+		<append>true</append>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_HOME}/rolls/crawler.%d{yyyy-MM-dd}.log
+			</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%date %-5level [%thread] - [%logger] - %msg%n</pattern>
+		</encoder>
+	</appender>
+	<logger name="com.gun3y.pagerank.analyzer" level="DEBUG" additivity="false">
+		<appender-ref ref="FILE_THREAD" />
+	</logger>
+	<logger name="com.gun3y.pagerank.crawler" level="DEBUG" additivity="false">
+		<appender-ref ref="FILE_CRAWLER" />
+	</logger>
+	<logger name="com.gun3y.pagerank" level="INFO" additivity="false">
+		<appender-ref ref="FILE_ANALYZER" />
+	</logger>
+	<logger name="org.hibernate" level="ERROR" additivity="false">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<root level="DEBUG">
+		<appender-ref ref="STDOUT" />
+	</root>
+</configuration>
