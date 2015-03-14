@@ -20,8 +20,8 @@ import org.slf4j.LoggerFactory;
 import com.gun3y.pagerank.dao.EnhancedHtmlPageDao;
 import com.gun3y.pagerank.entity.EnhancedHtmlPage;
 import com.gun3y.pagerank.entity.html.HtmlPage;
-import com.gun3y.pagerank.store.MongoHtmlPageDao;
-import com.gun3y.pagerank.utils.BeanUtils;
+import com.gun3y.pagerank.helper.BeanHelper;
+import com.gun3y.pagerank.store.HtmlPageDao;
 import com.gun3y.pagerank.utils.HtmlUtils;
 
 public class HtmlAggregator {
@@ -32,14 +32,14 @@ public class HtmlAggregator {
 
     private static final String HTML_HREF = "href";
 
-    private MongoHtmlPageDao mongoHtmlPageDao;
+    private HtmlPageDao htmlPageDao;
 
     private EnhancedHtmlPageDao enhancedHtmlPageDao;
 
     private Set<String> tempUrls = new HashSet<String>();
 
-    public HtmlAggregator(MongoHtmlPageDao mongoHtmlPageDao, EnhancedHtmlPageDao enhancedHtmlPageDao) {
-        this.mongoHtmlPageDao = mongoHtmlPageDao;
+    public HtmlAggregator(HtmlPageDao htmlPageDao, EnhancedHtmlPageDao enhancedHtmlPageDao) {
+        this.htmlPageDao = htmlPageDao;
         this.enhancedHtmlPageDao = enhancedHtmlPageDao;
     }
 
@@ -56,7 +56,7 @@ public class HtmlAggregator {
     private void displayHtmlPageStats() {
         StopWatch timer = new StopWatch();
         timer.start();
-        Iterator<HtmlPage> htmlPageIterator = this.mongoHtmlPageDao.getHtmlPageIterator();
+        Iterator<HtmlPage> htmlPageIterator = this.htmlPageDao.getHtmlPageIterator();
         Map<String, Integer> languages = new HashMap<String, Integer>();
         int count = 0;
         while (htmlPageIterator.hasNext()) {
@@ -79,7 +79,7 @@ public class HtmlAggregator {
         }
         LOGGER.info("No Lang: " + count);
         timer.stop();
-        int htmlPages = this.mongoHtmlPageDao.getHtmlPageCount();
+        int htmlPages = this.htmlPageDao.getHtmlPageCount();
         LOGGER.info("HtmlPage({}) Stats are executed in {} ms", htmlPages, timer.getTime());
 
     }
@@ -87,14 +87,14 @@ public class HtmlAggregator {
     private void transformEnhancedHtmlPages() {
         StopWatch timer = new StopWatch();
         timer.start();
-        Iterator<HtmlPage> htmlPageIterator = this.mongoHtmlPageDao.getHtmlPageIterator();
+        Iterator<HtmlPage> htmlPageIterator = this.htmlPageDao.getHtmlPageIterator();
         while (htmlPageIterator.hasNext()) {
             HtmlPage htmlPage = htmlPageIterator.next();
             if (!LANG_EN.equals(htmlPage.getLanguage())) {
                 continue;
             }
 
-            EnhancedHtmlPage enhancedHtmlPage = BeanUtils.newEnhancedHtmlPage(htmlPage);
+            EnhancedHtmlPage enhancedHtmlPage = BeanHelper.newEnhancedHtmlPage(htmlPage);
             this.enhancedHtmlPageDao.addHtmlPage(enhancedHtmlPage);
 
         }

@@ -1,70 +1,142 @@
 package com.gun3y.pagerank;
 
-import com.gun3y.pagerank.aggregator.HtmlAggregator;
-import com.gun3y.pagerank.analyzer.LinkAnalysisManager;
-import com.gun3y.pagerank.dao.EnhancedHtmlPageDao;
-import com.gun3y.pagerank.dao.HtmlTitleDao;
-import com.gun3y.pagerank.dao.LinkTupleDao;
-import com.gun3y.pagerank.store.MongoHtmlPageDao;
-import com.gun3y.pagerank.utils.DBUtils;
-import com.sleepycat.je.Environment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
+
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.Option;
+import org.kohsuke.args4j.ParserProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.gun3y.pagerank.aggregator.HtmlAggregator;
+import com.gun3y.pagerank.analyzer.ExplicitLinkAnalyzer;
+import com.gun3y.pagerank.analyzer.ImplicitLinkAnalyzer;
+import com.gun3y.pagerank.analyzer.SemanticLinkAnalyzer;
+import com.gun3y.pagerank.dao.EnhancedHtmlPageDao;
+import com.gun3y.pagerank.dao.HtmlTitleDao;
+import com.gun3y.pagerank.dao.LinkTupleDao;
+import com.gun3y.pagerank.store.HtmlPageDao;
+import com.gun3y.pagerank.utils.DBUtils;
+import com.gun3y.pagerank.utils.HibernateUtils;
+import com.sleepycat.je.Environment;
 
 public class MainApp {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainApp.class);
 
-    private static final String DB_PATH = "data-prdm";
-
-    public static void main22(String[] args) {
-
-        MongoHtmlPageDao mongoHtmlPageDao = new MongoHtmlPageDao("localhost", "PRDB");
-        mongoHtmlPageDao.init();
-
-        DBUtils.deleteFolderContents(new File(DB_PATH));
-        LOGGER.info("DB Path has been cleaned");
-
-        Environment env = DBUtils.newEnvironment(DB_PATH);
-        LOGGER.info("New Environment has been created");
-
-        EnhancedHtmlPageDao enhancedHtmlPageDao = new EnhancedHtmlPageDao(env);
-
-        HtmlAggregator aggregator = new HtmlAggregator(mongoHtmlPageDao, enhancedHtmlPageDao);
-
-        aggregator.transformHtmlPages();
-
-        enhancedHtmlPageDao.close();
-
-        mongoHtmlPageDao.close();
-
-        env.close();
-
+    public enum OP {
+        Explicit, Implicit, Semantic, All, EnhanceHtml, Test
     }
 
+    @Option(name = "-data-html", usage = "data path for html")
+    private String dataPathHtml = "PR-DATA/data_htmlpage";
+
+    @Option(name = "-data", usage = "data path")
+    private String dataPath = "PR-DATA/data_prdm";
+
+    @Option(name = "-op", usage = "operation code", required = true)
+    private OP op;
+
+    @Option(name = "-thread", usage = "thread size")
+    private int thread = 5;
+
     public static void main(String[] args) throws IOException {
+        MainApp app = new MainApp();
+        app.doMain(args);
+    }
+
+    public void doMain(String[] args) throws IOException {
         System.out.println(Calendar.getInstance().getTime());
-        Environment env = DBUtils.newEnvironment(DB_PATH);
-        LOGGER.info("New Environment has been created");
+        ParserProperties defaults = ParserProperties.defaults().withUsageWidth(100);
 
-        EnhancedHtmlPageDao enhancedHtmlPageDao = new EnhancedHtmlPageDao(env);
-        LinkTupleDao linkTupleDao = new LinkTupleDao();
+        CmdLineParser parser = new CmdLineParser(this, defaults);
 
-        HtmlTitleDao htmlTitleDao = new HtmlTitleDao(env);
+        try {
+            parser.parseArgument(args);
+        }
+        catch (CmdLineException e) {
+            System.err.println(e.getMessage());
+            parser.printUsage(System.out);
+            return;
+        }
+        try {
 
-        LinkAnalysisManager analysisManager = new LinkAnalysisManager(enhancedHtmlPageDao, linkTupleDao, htmlTitleDao);
-        analysisManager.analyze();
+            System.out.println("Data     : " + this.dataPath);
+            System.out.println("Data-Html: " + this.dataPathHtml);
+            System.out.println("OP       : " + this.op);
+            System.out.println("Thread   : " + this.thread);
 
-        enhancedHtmlPageDao.close();
+            Environment envHtml = DBUtils.newEnvironment(this.dataPathHtml);
 
-        htmlTitleDao.close();
-        linkTupleDao.close();
+            if (this.op == OP.EnhanceHtml) {
+                DBUtils.deleteFolderContents(new File(this.dataPath));
+                LOGGER.info("DB Path has been cleaned");
+            }
 
-        env.close();
+            Environment env = DBUtils.newEnvironment(this.dataPath);
+            LOGGER.info("New Environment has been created");
+
+            EnhancedHtmlPageDao eHtmlPageDao = new EnhancedHtmlPageDao(env);
+            LinkTupleDao linkTupleDao = new LinkTupleDao();
+            HtmlTitleDao htmlTitleDao = new HtmlTitleDao();
+
+            HtmlPageDao htmlPageDao = new HtmlPageDao(envHtml);
+
+            switch (this.op) {
+                case Explicit:
+                    ExplicitLinkAnalyzer ex1 = new ExplicitLinkAnalyzer(this.thread, htmlTitleDao, eHtmlPageDao, linkTupleDao);
+                    ex1.analyze();
+                    ex1.shutdown();
+                    break;
+                case Implicit:
+                    ImplicitLinkAnalyzer im1 = new ImplicitLinkAnalyzer(this.thread, htmlTitleDao, eHtmlPageDao, linkTupleDao);
+                    im1.analyze();
+                    im1.shutdown();
+                    break;
+                case Semantic:
+                    SemanticLinkAnalyzer sem1 = new SemanticLinkAnalyzer(this.thread, htmlTitleDao, eHtmlPageDao, linkTupleDao);
+                    sem1.analyze();
+                    sem1.shutdown();
+                    break;
+                case All:
+                    ExplicitLinkAnalyzer ex2 = new ExplicitLinkAnalyzer(this.thread, htmlTitleDao, eHtmlPageDao, linkTupleDao);
+                    ex2.analyze();
+                    ex2.shutdown();
+
+                    ImplicitLinkAnalyzer im2 = new ImplicitLinkAnalyzer(this.thread, htmlTitleDao, eHtmlPageDao, linkTupleDao);
+                    im2.analyze();
+                    im2.shutdown();
+
+                    SemanticLinkAnalyzer sem3 = new SemanticLinkAnalyzer(this.thread, htmlTitleDao, eHtmlPageDao, linkTupleDao);
+                    sem3.analyze();
+                    sem3.shutdown();
+
+                    break;
+                case EnhanceHtml:
+
+                    HtmlAggregator aggregator = new HtmlAggregator(htmlPageDao, eHtmlPageDao);
+
+                    aggregator.transformHtmlPages();
+                    break;
+                case Test:
+                    System.out.println("Test");
+                    break;
+            }
+
+            eHtmlPageDao.close();
+            htmlPageDao.close();
+            env.close();
+            envHtml.close();
+        }
+        catch (Throwable e) {
+            e.printStackTrace();
+        }
+        finally {
+            HibernateUtils.getSessionFactory().close();
+        }
         System.out.println(Calendar.getInstance().getTime());
     }
 }

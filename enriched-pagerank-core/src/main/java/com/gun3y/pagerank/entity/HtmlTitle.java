@@ -1,14 +1,16 @@
 package com.gun3y.pagerank.entity;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import java.io.Serializable;
+import java.util.Locale;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.io.Serializable;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Entity
 @Table(name = "HTML_TITLE", schema = "pagerank")
@@ -32,6 +34,11 @@ public class HtmlTitle implements Serializable {
         super();
         this.stemmedTitle = stemmedTitle;
         this.url = url;
+
+        if (this.stemmedTitle != null) {
+            this.stemmedTitle = this.stemmedTitle.toLowerCase(Locale.ENGLISH);
+        }
+
     }
 
     public String getStemmedTitle() {

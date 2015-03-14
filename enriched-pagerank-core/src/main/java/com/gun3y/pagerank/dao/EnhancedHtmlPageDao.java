@@ -15,7 +15,7 @@ import com.sleepycat.je.DatabaseConfig;
 import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
 
-public class EnhancedHtmlPageDao implements HtmlPageDao<EnhancedHtmlPage> {
+public class EnhancedHtmlPageDao {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnhancedHtmlPageDao.class);
 
@@ -38,7 +38,7 @@ public class EnhancedHtmlPageDao implements HtmlPageDao<EnhancedHtmlPage> {
 
         // db will be created if not exits
         dbConfig.setAllowCreate(true);
-        dbConfig.setTransactional(true);
+        dbConfig.setTransactional(false);
 
         Database catalogDb = this.env.openDatabase(null, CLASS_CATALOG, dbConfig);
         this.catalog = new StoredClassCatalog(catalogDb);
@@ -50,7 +50,6 @@ public class EnhancedHtmlPageDao implements HtmlPageDao<EnhancedHtmlPage> {
 
     }
 
-    @Override
     public void addHtmlPage(EnhancedHtmlPage page) {
         if (page == null) {
             return;
@@ -65,22 +64,18 @@ public class EnhancedHtmlPageDao implements HtmlPageDao<EnhancedHtmlPage> {
 
     }
 
-    @Override
     public Iterator<EnhancedHtmlPage> getHtmlPageIterator() {
         return this.enhancedHtmlPageMap.values().iterator();
     }
 
-    @Override
     public EnhancedHtmlPage getHtmlPageByUrl(String url) {
         return this.enhancedHtmlPageMap.get(url);
     }
 
-    @Override
     public int getHtmlPageCount() {
         return this.enhancedHtmlPageMap.size();
     }
 
-    @Override
     public void close() {
         try {
             this.htmlPageDB.close();
@@ -91,7 +86,6 @@ public class EnhancedHtmlPageDao implements HtmlPageDao<EnhancedHtmlPage> {
         }
     }
 
-    @Override
     public void updateHtmlPage(String url, EnhancedHtmlPage page) {
         if (StringUtils.isBlank(url)) {
             LOGGER.error("Update URL is missing");

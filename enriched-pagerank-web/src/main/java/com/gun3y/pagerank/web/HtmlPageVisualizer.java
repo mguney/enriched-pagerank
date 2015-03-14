@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import com.gun3y.pagerank.entity.html.HtmlPage;
 import com.gun3y.pagerank.entity.html.WebUrl;
-import com.gun3y.pagerank.store.MongoHtmlPageDao;
 import com.gun3y.pagerank.web.d3.Node;
 import com.gun3y.pagerank.web.d3.NodeLink;
 import com.gun3y.pagerank.web.d3.Stat;
@@ -27,13 +26,16 @@ public class HtmlPageVisualizer {
     private static final Logger LOGGER = LoggerFactory.getLogger(HtmlPageVisualizer.class);
 
     public static void main(String[] args) throws UnknownHostException {
-        MongoHtmlPageDao mongoManager = new MongoHtmlPageDao();
-        mongoManager.init();
+        // Environment envHtml =
+        // null;//DBUtils.newEnvironment(MainApp.DB_PATH_HTML);
+
+        // HtmlPageDao htmlPageDao = new HtmlPageDao(envHtml);
+
         final Map<Integer, Pair<Set<Integer>, Set<Integer>>> pageRanks = new HashMap<Integer, Pair<Set<Integer>, Set<Integer>>>();
 
         final Map<Integer, Pair<String, Integer>> idMap = new HashMap<Integer, Pair<String, Integer>>();
 
-        Iterator<HtmlPage> htmlPageIterator = mongoManager.getHtmlPageIterator();
+        Iterator<HtmlPage> htmlPageIterator = null;// htmlPageDao.getHtmlPageIterator();
 
         while (htmlPageIterator.hasNext()) {
             HtmlPage htmlPage = htmlPageIterator.next();
@@ -119,7 +121,7 @@ public class HtmlPageVisualizer {
         // ArrayList<NodeLink>(nodeLinkMap.values()))));
         //
 
-        mongoManager.close();
+        // mongoManager.close();
 
     }
 

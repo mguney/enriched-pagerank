@@ -38,7 +38,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gun3y.pagerank.crawler.BasicCrawler;
-import com.gun3y.pagerank.store.MongoHtmlPageDao;
+import com.gun3y.pagerank.store.HtmlPageDao;
+import com.gun3y.pagerank.utils.DBUtils;
+import com.sleepycat.je.Environment;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
@@ -89,13 +91,9 @@ public class CrawlerFrame extends JFrame {
 
     private JTextField txtUserAgent;
 
-    private MongoHtmlPageDao mongoManager;
+    private HtmlPageDao htmlPageDao;
 
     private CrawlController controller;
-
-    String dbHost;
-
-    String dbName;
 
     /**
      * Launch the application.
@@ -134,8 +132,8 @@ public class CrawlerFrame extends JFrame {
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                if (CrawlerFrame.this.mongoManager != null) {
-                    CrawlerFrame.this.mongoManager.close();
+                if (CrawlerFrame.this.htmlPageDao != null) {
+                    CrawlerFrame.this.htmlPageDao.close();
                 }
             }
         });
@@ -179,15 +177,6 @@ public class CrawlerFrame extends JFrame {
     }
 
     private void startCrawler() {
-        String dbHost = "localhost";
-        if (StringUtils.isNotBlank(this.dbHost)) {
-            dbHost = this.dbHost;
-        }
-        String dbName = "PageRankCrawlerDB";
-        if (StringUtils.isNotBlank(this.dbName)) {
-            dbName = this.dbName;
-        }
-
         CrawlConfig config = new CrawlConfig();
         if (StringUtils.isNotBlank(this.txtConnectionTimeout.getText())) {
             int connectionTimeout = Integer.parseInt(this.txtConnectionTimeout.getText());
@@ -253,11 +242,13 @@ public class CrawlerFrame extends JFrame {
         RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
 
         RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
-        this.mongoManager = new MongoHtmlPageDao(dbHost, dbName);
+
+        Environment env = DBUtils.newEnvironment(crawlStorageFolder + "_html_page");
+
+        this.htmlPageDao = new HtmlPageDao(env);
 
         try {
             this.controller = new CrawlController(config, pageFetcher, robotstxtServer);
-            this.mongoManager.init();
         }
         catch (UnknownHostException e) {
             JOptionPane.showMessageDialog(this, "Unknown Host", "Error", JOptionPane.ERROR_MESSAGE);
@@ -278,11 +269,11 @@ public class CrawlerFrame extends JFrame {
             crawlerThread = Integer.parseInt(this.txtCrawlerThread.getText());
         }
         LOGGER.info("Crawler Thread: " + crawlerThread);
-        this.controller.setCustomData(this.mongoManager);
+        this.controller.setCustomData(this.htmlPageDao);
 
         this.controller.startNonBlocking(BasicCrawler.class, crawlerThread);
 
-        LogViewer logViewer = new LogViewer(this, this.controller, this.mongoManager);
+        LogViewer logViewer = new LogViewer(this, this.controller, this.htmlPageDao);
         logViewer.setVisible(true);
     }
 
@@ -385,66 +376,66 @@ public class CrawlerFrame extends JFrame {
             GroupLayout gl_panelRight = new GroupLayout(this.panelRight);
             gl_panelRight.setHorizontalGroup(gl_panelRight.createParallelGroup(Alignment.LEADING).addGroup(
                     gl_panelRight
-                    .createSequentialGroup()
-                    .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(
-                            gl_panelRight
-                            .createParallelGroup(Alignment.TRAILING)
-                            .addComponent(scrollPaneSeeds, GroupLayout.PREFERRED_SIZE, 420, GroupLayout.PREFERRED_SIZE)
+                            .createSequentialGroup()
+                            .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(
-                                    gl_panelRight.createSequentialGroup().addComponent(this.btnAddSeed)
-                                    .addPreferredGap(ComponentPlacement.RELATED).addComponent(this.btnRemoveSeed))
-                                    .addComponent(this.btnBrowse)
-                                    .addGroup(
-                                            gl_panelRight
-                                            .createSequentialGroup()
+                                    gl_panelRight
+                                            .createParallelGroup(Alignment.TRAILING)
+                                            .addComponent(scrollPaneSeeds, GroupLayout.PREFERRED_SIZE, 420, GroupLayout.PREFERRED_SIZE)
+                                            .addGroup(
+                                                    gl_panelRight.createSequentialGroup().addComponent(this.btnAddSeed)
+                                                            .addPreferredGap(ComponentPlacement.RELATED).addComponent(this.btnRemoveSeed))
+                                            .addComponent(this.btnBrowse)
                                             .addGroup(
                                                     gl_panelRight
-                                                    .createParallelGroup(Alignment.LEADING)
-                                                    .addComponent(lblCrawlerStorage, GroupLayout.PREFERRED_SIZE,
-                                                            104, GroupLayout.PREFERRED_SIZE)
-                                                            .addComponent(lblUserAgent)
-                                                            .addComponent(lblSeeds, GroupLayout.PREFERRED_SIZE, 80,
-                                                                    GroupLayout.PREFERRED_SIZE))
-                                                                    .addPreferredGap(ComponentPlacement.RELATED)
-                                                                    .addGroup(
-                                                                            gl_panelRight
+                                                            .createSequentialGroup()
+                                                            .addGroup(
+                                                                    gl_panelRight
+                                                                            .createParallelGroup(Alignment.LEADING)
+                                                                            .addComponent(lblCrawlerStorage, GroupLayout.PREFERRED_SIZE,
+                                                                                    104, GroupLayout.PREFERRED_SIZE)
+                                                                            .addComponent(lblUserAgent)
+                                                                            .addComponent(lblSeeds, GroupLayout.PREFERRED_SIZE, 80,
+                                                                                    GroupLayout.PREFERRED_SIZE))
+                                                            .addPreferredGap(ComponentPlacement.RELATED)
+                                                            .addGroup(
+                                                                    gl_panelRight
                                                                             .createParallelGroup(Alignment.LEADING, false)
                                                                             .addComponent(this.txtUserAgent, Alignment.TRAILING)
                                                                             .addComponent(this.txtCrawlerStorage, Alignment.TRAILING,
                                                                                     GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
-                                                                                    .addComponent(this.txtSeeds, GroupLayout.PREFERRED_SIZE, 420,
-                                                                                            GroupLayout.PREFERRED_SIZE)))).addGap(12)));
+                                                                            .addComponent(this.txtSeeds, GroupLayout.PREFERRED_SIZE, 420,
+                                                                                    GroupLayout.PREFERRED_SIZE)))).addGap(12)));
             gl_panelRight.setVerticalGroup(gl_panelRight.createParallelGroup(Alignment.LEADING).addGroup(
                     gl_panelRight
-                    .createSequentialGroup()
-                    .addContainerGap()
-                    .addGroup(
-                            gl_panelRight
-                            .createParallelGroup(Alignment.BASELINE)
-                            .addComponent(lblCrawlerStorage, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
-                            .addComponent(this.txtCrawlerStorage, GroupLayout.PREFERRED_SIZE, 30,
-                                    GroupLayout.PREFERRED_SIZE))
-                                    .addPreferredGap(ComponentPlacement.RELATED)
-                                    .addComponent(this.btnBrowse, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
-                                    .addPreferredGap(ComponentPlacement.RELATED)
-                                    .addGroup(
-                                            gl_panelRight.createParallelGroup(Alignment.BASELINE)
+                            .createSequentialGroup()
+                            .addContainerGap()
+                            .addGroup(
+                                    gl_panelRight
+                                            .createParallelGroup(Alignment.BASELINE)
+                                            .addComponent(lblCrawlerStorage, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(this.txtCrawlerStorage, GroupLayout.PREFERRED_SIZE, 30,
+                                                    GroupLayout.PREFERRED_SIZE))
+                            .addPreferredGap(ComponentPlacement.RELATED)
+                            .addComponent(this.btnBrowse, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(ComponentPlacement.RELATED)
+                            .addGroup(
+                                    gl_panelRight.createParallelGroup(Alignment.BASELINE)
                                             .addComponent(this.txtUserAgent, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
                                             .addComponent(lblUserAgent))
-                                            .addPreferredGap(ComponentPlacement.RELATED)
-                                            .addGroup(
-                                                    gl_panelRight.createParallelGroup(Alignment.BASELINE)
-                                                    .addComponent(this.txtSeeds, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
-                                                    .addComponent(lblSeeds, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
-                                                    .addPreferredGap(ComponentPlacement.RELATED)
-                                                    .addGroup(
-                                                            gl_panelRight.createParallelGroup(Alignment.BASELINE)
-                                                            .addComponent(this.btnRemoveSeed, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
-                                                            .addComponent(this.btnAddSeed, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
-                                                            .addPreferredGap(ComponentPlacement.RELATED)
-                                                            .addComponent(scrollPaneSeeds, GroupLayout.PREFERRED_SIZE, 256, GroupLayout.PREFERRED_SIZE)
-                                                            .addContainerGap(73, Short.MAX_VALUE)));
+                            .addPreferredGap(ComponentPlacement.RELATED)
+                            .addGroup(
+                                    gl_panelRight.createParallelGroup(Alignment.BASELINE)
+                                            .addComponent(this.txtSeeds, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(lblSeeds, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
+                            .addPreferredGap(ComponentPlacement.RELATED)
+                            .addGroup(
+                                    gl_panelRight.createParallelGroup(Alignment.BASELINE)
+                                            .addComponent(this.btnRemoveSeed, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(this.btnAddSeed, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
+                            .addPreferredGap(ComponentPlacement.RELATED)
+                            .addComponent(scrollPaneSeeds, GroupLayout.PREFERRED_SIZE, 256, GroupLayout.PREFERRED_SIZE)
+                            .addContainerGap(73, Short.MAX_VALUE)));
             gl_panelRight.setAutoCreateGaps(true);
             gl_panelRight.setAutoCreateContainerGaps(true);
             this.panelRight.setLayout(gl_panelRight);
@@ -593,8 +584,7 @@ public class CrawlerFrame extends JFrame {
             this.btnDBConfig.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    DBConfig dbConfig = new DBConfig(CrawlerFrame.this);
-                    dbConfig.setVisible(true);
+
                 }
             });
             this.btnDBConfig.setFont(new Font("SansSerif", Font.BOLD, 16));

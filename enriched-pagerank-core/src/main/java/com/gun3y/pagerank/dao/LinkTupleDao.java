@@ -1,26 +1,28 @@
 package com.gun3y.pagerank.dao;
 
-import com.gun3y.pagerank.entity.HtmlTitle;
-import com.gun3y.pagerank.entity.LinkTuple;
-import com.gun3y.pagerank.entity.LinkType;
-import com.gun3y.pagerank.utils.HibernateUtils;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.ParameterMode;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
 import org.hibernate.procedure.ProcedureCall;
 
-import javax.persistence.ParameterMode;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.gun3y.pagerank.entity.HtmlTitle;
+import com.gun3y.pagerank.entity.LinkTuple;
+import com.gun3y.pagerank.entity.LinkType;
+import com.gun3y.pagerank.utils.HibernateUtils;
 
 public class LinkTupleDao {
 
     public LinkTupleDao() {
     }
 
-    public LinkTuple addLinkTuple(LinkTuple linkTuple) {
+    public synchronized LinkTuple addLinkTuple(LinkTuple linkTuple) {
         if (linkTuple == null || !linkTuple.validate()) {
             return null;
         }
@@ -28,7 +30,7 @@ public class LinkTupleDao {
         return linkTuple;
     }
 
-    public void addLinkTuple(Collection<LinkTuple> linkTuples) {
+    public synchronized void addLinkTuple(Collection<LinkTuple> linkTuples) {
         if (linkTuples == null || linkTuples.isEmpty()) {
             return;
         }
@@ -36,11 +38,11 @@ public class LinkTupleDao {
         this.executeBulkInsert(linkTuples);
     }
 
-    public long count() {
+    public synchronized long count() {
         return this.executeCount("select count(*) from LinkTuple");
     }
 
-    public long count(LinkType linkType) {
+    public synchronized long count(LinkType linkType) {
         if (linkType == null) {
             return -1;
         }
@@ -48,21 +50,21 @@ public class LinkTupleDao {
         return this.executeCount("select count(*) from LinkTuple where LT_LINK_TYPE = " + linkType.ordinal());
     }
 
-    public long count(LinkTuple linkTuple) {
+    public synchronized long count(LinkTuple linkTuple) {
         if (linkTuple == null) {
             return -1;
         }
 
         StringBuilder builder = new StringBuilder();
         builder.append("select count(*) from LinkTuple where ").append("LT_FROM ='").append(linkTuple.getFrom()).append("' and ")
-                .append("LT_TO ='").append(linkTuple.getTo()).append("' and ").append("LT_LINK_TYPE= ")
-                .append(linkTuple.getLinkType().ordinal()).append(" and LT_REL = '")
-                .append(StringUtils.replace(linkTuple.getRel(), "'", "''")).append("'");
+        .append("LT_TO ='").append(linkTuple.getTo()).append("' and ").append("LT_LINK_TYPE= ")
+        .append(linkTuple.getLinkType().ordinal()).append(" and LT_REL = '")
+        .append(StringUtils.replace(linkTuple.getRel(), "'", "''")).append("'");
 
         return this.executeCount(builder.toString());
     }
 
-    public long applySameUrlFilter(LinkType linkType) {
+    public synchronized long applySameUrlFilter(LinkType linkType) {
         if (linkType == null) {
             return -1;
         }
@@ -79,7 +81,8 @@ public class LinkTupleDao {
             retults = (int) spCall.getOutputs().getOutputParameterValue("removedRows");
 
             session.getTransaction().commit();
-        } catch (RuntimeException e) {
+        }
+        catch (RuntimeException e) {
             session.getTransaction().rollback();
             throw e;
         }
@@ -87,34 +90,46 @@ public class LinkTupleDao {
         return retults;
     }
 
-    public long applyMinCountFilter(LinkType linkType, int minOccurs) {
+    public synchronized long applyMinCountFilter(LinkType linkType, int minOccurs) {
         if (linkType == null || minOccurs < 1) {
             return -1;
         }
 
-        Session session = HibernateUtils.getSessionFactory().getCurrentSession();
-        int retults;
-        try {
-            session.getTransaction().begin();
+        String query = "delete a from link_tuple as a join " + "(select LT_FROM, LT_TO, LT_REL from link_tuple where LT_LINK_TYPE = "
+                + linkType.ordinal() + " group by LT_FROM, LT_TO, LT_REL having count(*) < " + minOccurs + ") as b "
+                + "on a.lt_from = b.lt_from and a.lt_to = b.lt_to and a.lt_rel = b.lt_rel;";
 
-            ProcedureCall spCall = session.createStoredProcedureCall("APPLY_MIN_COUNT_FILTER");
-            spCall.registerParameter("linkType", Integer.class, ParameterMode.IN).bindValue(linkType.ordinal());
-            spCall.registerParameter("minOccurs", Integer.class, ParameterMode.IN).bindValue(minOccurs);
-            spCall.registerParameter("removedRows", Integer.class, ParameterMode.OUT);
+        return this.executeSqlQuery(query);
+        // Session session =
+        // HibernateUtils.getSessionFactory().getCurrentSession();
+        // int retults;
+        // try {
+        // session.getTransaction().begin();
+        //
+        // ProcedureCall spCall =
+        // session.createStoredProcedureCall("APPLY_MIN_COUNT_FILTER");
+        // spCall.registerParameter("linkType", Integer.class,
+        // ParameterMode.IN).bindValue(linkType.ordinal());
+        // spCall.registerParameter("minOccurs", Integer.class,
+        // ParameterMode.IN).bindValue(minOccurs);
+        // spCall.registerParameter("removedRows", Integer.class,
+        // ParameterMode.OUT);
+        //
+        // retults = (int)
+        // spCall.getOutputs().getOutputParameterValue("removedRows");
+        //
+        // session.getTransaction().commit();
+        // }
+        // catch (RuntimeException e) {
+        // session.getTransaction().rollback();
+        // throw e;
+        // }
 
-            retults = (int) spCall.getOutputs().getOutputParameterValue("removedRows");
-
-            session.getTransaction().commit();
-        } catch (RuntimeException e) {
-            session.getTransaction().rollback();
-            throw e;
-        }
-
-        return retults;
+        // return retults;
     }
 
     @SuppressWarnings("unchecked")
-    public Set<HtmlTitle> findAllTitles() {
+    public synchronized Set<HtmlTitle> findAllTitles() {
 
         Set<HtmlTitle> titleSet = new HashSet<HtmlTitle>();
 
@@ -127,24 +142,19 @@ public class LinkTupleDao {
     }
 
     /*
-        @SuppressWarnings("unchecked")
-        public List<String> findAllVerbs() {
-            return (List<String>) this.executeSelect("select distinct rel from LinkTuple where LT_LINK_TYPE = "
-                    + LinkType.SemanticLink.ordinal());
-        }
-
-        @SuppressWarnings("unchecked")
-        public List<LinkTuple> getLinkTuples(LinkType linkType) {
-            return (List<LinkTuple>) this.executeSelect("from LinkTuple where LT_LINK_TYPE =" + linkType.ordinal());
-        }
-    */
-    public void removeAll() {
+     * @SuppressWarnings("unchecked") public List<String> findAllVerbs() {
+     * return (List<String>)
+     * this.executeSelect("select distinct rel from LinkTuple where LT_LINK_TYPE = "
+     * + LinkType.SemanticLink.ordinal()); }
+     *
+     * @SuppressWarnings("unchecked") public List<LinkTuple>
+     * getLinkTuples(LinkType linkType) { return (List<LinkTuple>)
+     * this.executeSelect("from LinkTuple where LT_LINK_TYPE =" +
+     * linkType.ordinal()); }
+     */
+    public synchronized void removeAll() {
         this.executeSqlQuery("truncate table LINK_TUPLE");
-        this.executeSqlQuery("truncate table LINK_TUPLE_COUNT");
-    }
-
-    public void close() {
-        HibernateUtils.getSessionFactory().close();
+        // this.executeSqlQuery("truncate table LINK_TUPLE_COUNT");
     }
 
     private void executeBulkInsert(Collection<LinkTuple> tuples) {
@@ -160,7 +170,8 @@ public class LinkTupleDao {
             }
 
             statelessSession.getTransaction().commit();
-        } catch (RuntimeException e) {
+        }
+        catch (RuntimeException e) {
             statelessSession.getTransaction().rollback();
             throw e;
         }
@@ -175,27 +186,11 @@ public class LinkTupleDao {
             session.save(linkTuple);
 
             session.getTransaction().commit();
-        } catch (RuntimeException e) {
+        }
+        catch (RuntimeException e) {
             session.getTransaction().rollback();
             throw e;
         }
-    }
-
-    private int executeDeleteOrUpdate(String query) {
-        Session session = HibernateUtils.getSessionFactory().getCurrentSession();
-        int retults;
-        try {
-            session.getTransaction().begin();
-
-            retults = session.createQuery(query).executeUpdate();
-
-            session.getTransaction().commit();
-        } catch (RuntimeException e) {
-            session.getTransaction().rollback();
-            throw e;
-        }
-
-        return retults;
     }
 
     private int executeSqlQuery(String query) {
@@ -207,7 +202,8 @@ public class LinkTupleDao {
             retults = session.createSQLQuery(query).executeUpdate();
 
             session.getTransaction().commit();
-        } catch (RuntimeException e) {
+        }
+        catch (RuntimeException e) {
             session.getTransaction().rollback();
             throw e;
         }
@@ -224,7 +220,8 @@ public class LinkTupleDao {
             retults = session.createQuery(query).list();
 
             session.getTransaction().commit();
-        } catch (RuntimeException e) {
+        }
+        catch (RuntimeException e) {
             session.getTransaction().rollback();
             throw e;
         }
@@ -241,7 +238,8 @@ public class LinkTupleDao {
             count = (long) session.createQuery(query).uniqueResult();
 
             session.getTransaction().commit();
-        } catch (RuntimeException e) {
+        }
+        catch (RuntimeException e) {
             session.getTransaction().rollback();
             throw e;
         }

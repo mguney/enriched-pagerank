@@ -24,11 +24,6 @@
 					<!-- keep 30 days' worth of history -->
 					<maxHistory>30</maxHistory>
 				</rollingPolicy>
-				<filter class="ch.qos.logback.classic.filter.LevelFilter">
-					<level>DEBUG</level>
-					<onMatch>ACCEPT</onMatch>
-					<onMismatch>DENY</onMismatch>
-				</filter>
 				<encoder>
 					<pattern>%msg%n</pattern>
 				</encoder>
@@ -55,11 +50,6 @@
 			<!-- keep 30 days' worth of history -->
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
-		<filter class="ch.qos.logback.classic.filter.LevelFilter">
-			<level>INFO</level>
-			<onMatch>ACCEPT</onMatch>
-			<onMismatch>DENY</onMismatch>
-		</filter>
 		<encoder>
 			<pattern>%msg%n</pattern>
 		</encoder>
@@ -77,9 +67,11 @@
 		</encoder>
 	</appender>
 	<logger name="com.gun3y.pagerank.analyzer" level="DEBUG" additivity="false">
-		<!-- <appender-ref ref="FILE_DETAIL_ANALYZER" /> -->
-		<appender-ref ref="FILE_ANALYZER" />
 		<appender-ref ref="FILE_THREAD" />
+	</logger>
+	
+	<logger name="com.gun3y.pagerank" level="INFO" additivity="false">
+		<appender-ref ref="FILE_ANALYZER" />
 	</logger>
 
     <logger name="org.hibernate" level="ERROR" additivity="false">

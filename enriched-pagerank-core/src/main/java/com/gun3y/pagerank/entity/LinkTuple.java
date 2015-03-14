@@ -1,11 +1,19 @@
 package com.gun3y.pagerank.entity;
 
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import javax.persistence.*;
-import java.io.Serializable;
 
 @Entity
 @Table(name = "LINK_TUPLE", schema = "pagerank")
@@ -31,9 +39,6 @@ public class LinkTuple implements Serializable, Comparable<LinkTuple> {
     @Enumerated(EnumType.ORDINAL)
     private LinkType linkType;
 
-    @Column(name = "LT_COUNT_ID")
-    private Integer countId;
-
     public LinkTuple() {
         super();
     }
@@ -53,7 +58,8 @@ public class LinkTuple implements Serializable, Comparable<LinkTuple> {
     }
 
     public boolean validate() {
-        return StringUtils.isNotBlank(this.from) && StringUtils.isNotBlank(this.to) && this.linkType != null;
+        return StringUtils.isNotBlank(this.from) && StringUtils.isNotBlank(this.to) && this.linkType != null && this.from.length() < 200
+                && this.to.length() < 200 && (this.rel == null || this.rel.length() < 120);
     }
 
     public String getFrom() {
@@ -94,14 +100,6 @@ public class LinkTuple implements Serializable, Comparable<LinkTuple> {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public Integer getCountId() {
-        return this.countId;
-    }
-
-    public void setCountId(Integer countId) {
-        this.countId = countId;
     }
 
     @Override

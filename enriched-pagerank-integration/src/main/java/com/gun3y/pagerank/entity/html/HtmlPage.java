@@ -2,17 +2,9 @@ package com.gun3y.pagerank.entity.html;
 
 import java.io.Serializable;
 
-import org.bson.types.ObjectId;
-import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.Id;
-
-@Entity
 public class HtmlPage implements Serializable {
 
     private static final long serialVersionUID = 6915863557498073804L;
-
-    @Id
-    ObjectId id;
 
     private WebUrl url;
     private boolean redirect;

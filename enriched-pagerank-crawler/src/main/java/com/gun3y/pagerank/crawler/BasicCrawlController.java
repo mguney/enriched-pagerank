@@ -1,6 +1,8 @@
 package com.gun3y.pagerank.crawler;
 
-import com.gun3y.pagerank.store.MongoHtmlPageDao;
+import com.gun3y.pagerank.store.HtmlPageDao;
+import com.gun3y.pagerank.utils.DBUtils;
+import com.sleepycat.je.Environment;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
@@ -44,7 +46,7 @@ public class BasicCrawlController {
          * You can set the maximum number of pages to crawl. The default value
          * is -1 for unlimited number of pages
          */
-        config.setMaxPagesToFetch(1000);
+        config.setMaxPagesToFetch(2000);
 
         /*
          * Do you need to set a proxy? If so, you can use:
@@ -102,19 +104,24 @@ public class BasicCrawlController {
         controller.addSeed("http://en.wikipedia.org/wiki/Computer");
         controller.addSeed("http://en.wikipedia.org/wiki/Software");
         controller.addSeed("http://en.wikipedia.org/wiki/Manchester");
+        controller.addSeed("http://en.wikipedia.org/wiki/Main_Page");
+        controller.addSeed("http://en.wikipedia.org/wiki/Color");
+        controller.addSeed("http://en.wikipedia.org/wiki/Pi");
+        controller.addSeed("http://en.wikipedia.org/wiki/0_(number)");
 
-        MongoHtmlPageDao mongoManager = new MongoHtmlPageDao("localhost", "PRDB");
-        mongoManager.init();
+        // TODO: env. set edilmeli
+        Environment env = DBUtils.newEnvironment("");
 
-        controller.setCustomData(mongoManager);
+        HtmlPageDao htmlPageDao = new HtmlPageDao(env);
+
+        controller.setCustomData(htmlPageDao);
         /*
          * Start the crawl. This is a blocking operation, meaning that your code
          * will reach the line after this only when crawling is finished.
          */
         controller.start(BasicCrawler.class, numberOfCrawlers);
 
-        mongoManager.close();
+        htmlPageDao.close();
 
     }
-
 }

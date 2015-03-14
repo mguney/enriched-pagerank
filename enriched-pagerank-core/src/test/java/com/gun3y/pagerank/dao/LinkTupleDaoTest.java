@@ -1,13 +1,15 @@
 package com.gun3y.pagerank.dao;
 
-import com.gun3y.pagerank.entity.LinkTuple;
-import com.gun3y.pagerank.entity.LinkType;
-import org.apache.commons.lang3.time.StopWatch;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import org.apache.commons.lang3.time.StopWatch;
+
+import com.gun3y.pagerank.entity.LinkTuple;
+import com.gun3y.pagerank.entity.LinkType;
+import com.gun3y.pagerank.utils.HibernateUtils;
 
 /**
  * Created by Mustafa on 01.03.2015.
@@ -53,8 +55,9 @@ public class LinkTupleDaoTest {
             long applySameUrlFilter = dao.applySameUrlFilter(LinkType.ImplicitLink);
             timer.stop();
             System.out.println(applySameUrlFilter + "  time " + timer.getTime());
-        } finally {
-            dao.close();
+        }
+        finally {
+            HibernateUtils.getSessionFactory().close();
         }
 
     }
@@ -77,8 +80,9 @@ public class LinkTupleDaoTest {
             dao.addLinkTuple(lst);
             timer.stop();
             System.out.println("add ends " + timer.getTime());
-        } finally {
-            dao.close();
+        }
+        finally {
+            HibernateUtils.getSessionFactory().close();
         }
     }
 }

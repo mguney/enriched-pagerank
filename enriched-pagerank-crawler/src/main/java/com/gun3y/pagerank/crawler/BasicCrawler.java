@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.gun3y.pagerank.crawler.mapping.BeanMapper;
 import com.gun3y.pagerank.entity.html.HtmlData;
 import com.gun3y.pagerank.entity.html.HtmlPage;
-import com.gun3y.pagerank.store.MongoHtmlPageDao;
+import com.gun3y.pagerank.store.HtmlPageDao;
 import com.gun3y.pagerank.utils.HtmlUtils;
 
 import edu.uci.ics.crawler4j.crawler.Page;
@@ -26,14 +26,14 @@ public class BasicCrawler extends WebCrawler {
 
     private final static Pattern FILTERS = Pattern.compile(HtmlUtils.REGEX_HTML_PAGES);
 
-    private MongoHtmlPageDao mongoManager;
+    private HtmlPageDao htmlPageDao;
 
     @Override
     public void onStart() {
         Object customData = this.myController.getCustomData();
 
-        if (customData != null && customData instanceof MongoHtmlPageDao) {
-            this.mongoManager = (MongoHtmlPageDao) customData;
+        if (customData != null && customData instanceof HtmlPageDao) {
+            this.htmlPageDao = (HtmlPageDao) customData;
         }
     }
 
@@ -97,8 +97,8 @@ public class BasicCrawler extends WebCrawler {
                 }
             }
 
-            if (this.mongoManager != null) {
-                this.mongoManager.addHtmlPage(htmlPage);
+            if (this.htmlPageDao != null) {
+                this.htmlPageDao.addHtmlPage(htmlPage);
             }
         }
 

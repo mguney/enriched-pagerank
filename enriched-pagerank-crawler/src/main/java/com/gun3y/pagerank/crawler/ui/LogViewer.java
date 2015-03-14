@@ -20,7 +20,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gun3y.pagerank.store.MongoHtmlPageDao;
+import com.gun3y.pagerank.store.HtmlPageDao;
 
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 
@@ -37,7 +37,7 @@ public class LogViewer extends JDialog {
 
     private CrawlController controller;
 
-    private MongoHtmlPageDao mongoManager;
+    private HtmlPageDao htmlPageDao;
 
     private Thread statRunner = new Thread(new Runnable() {
 
@@ -45,8 +45,8 @@ public class LogViewer extends JDialog {
         public void run() {
             while (true) {
 
-                if (LogViewer.this.mongoManager != null) {
-                    long count = LogViewer.this.mongoManager.getHtmlPageCount();
+                if (LogViewer.this.htmlPageDao != null) {
+                    long count = LogViewer.this.htmlPageDao.getHtmlPageCount();
                     LogViewer.this.lblPageSize.setText(count + "");
                 }
                 else {
@@ -89,10 +89,10 @@ public class LogViewer extends JDialog {
      *
      * @param controller
      */
-    public LogViewer(CrawlerFrame crawlerFrame, CrawlController controller, MongoHtmlPageDao mongoManager) {
+    public LogViewer(CrawlerFrame crawlerFrame, CrawlController controller, HtmlPageDao mongoManager) {
         super(crawlerFrame);
         this.controller = controller;
-        this.mongoManager = mongoManager;
+        this.htmlPageDao = mongoManager;
         this.setModal(true);
         this.setModalityType(ModalityType.APPLICATION_MODAL);
         this.setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
@@ -126,15 +126,15 @@ public class LogViewer extends JDialog {
             gl_panel.setHorizontalGroup(gl_panel.createParallelGroup(Alignment.LEADING).addGroup(
                     Alignment.TRAILING,
                     gl_panel.createSequentialGroup().addContainerGap(678, Short.MAX_VALUE).addComponent(this.getLblPageItems())
-                    .addPreferredGap(ComponentPlacement.RELATED)
-                    .addComponent(this.getLblPageSize(), GroupLayout.PREFERRED_SIZE, 51, GroupLayout.PREFERRED_SIZE)
-                    .addPreferredGap(ComponentPlacement.RELATED).addComponent(this.getBtnStopCrawling()).addContainerGap()));
+                            .addPreferredGap(ComponentPlacement.RELATED)
+                            .addComponent(this.getLblPageSize(), GroupLayout.PREFERRED_SIZE, 51, GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(ComponentPlacement.RELATED).addComponent(this.getBtnStopCrawling()).addContainerGap()));
             gl_panel.setVerticalGroup(gl_panel.createParallelGroup(Alignment.LEADING).addGroup(
                     gl_panel.createSequentialGroup()
-                    .addContainerGap(10, Short.MAX_VALUE)
-                    .addGroup(
-                            gl_panel.createParallelGroup(Alignment.BASELINE).addComponent(this.getBtnStopCrawling())
-                            .addComponent(this.getLblPageSize()).addComponent(this.getLblPageItems())).addGap(10)));
+                            .addContainerGap(10, Short.MAX_VALUE)
+                            .addGroup(
+                                    gl_panel.createParallelGroup(Alignment.BASELINE).addComponent(this.getBtnStopCrawling())
+                                            .addComponent(this.getLblPageSize()).addComponent(this.getLblPageItems())).addGap(10)));
             this.panel.setLayout(gl_panel);
         }
         return this.panel;
@@ -148,7 +148,7 @@ public class LogViewer extends JDialog {
                 public void actionPerformed(ActionEvent e) {
                     if (LogViewer.this.controller != null) {
 
-                        LogViewer.this.mongoManager = null;
+                        LogViewer.this.htmlPageDao = null;
 
                         LogViewer.this.controller.shutdown();
                         LogViewer.this.controller.waitUntilFinish();
