@@ -19,11 +19,11 @@ public class HtmlTitle implements Serializable {
     private static final long serialVersionUID = 5620008418277465565L;
 
     @Id
-    @Column(name = "HT_TITLE")
+    @Column(name = "ht_title")
     private String stemmedTitle;
 
     @Id
-    @Column(name = "HT_URL")
+    @Column(name = "ht_url")
     private String url;
 
     public HtmlTitle() {

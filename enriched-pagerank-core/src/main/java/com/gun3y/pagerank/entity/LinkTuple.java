@@ -23,19 +23,19 @@ public class LinkTuple implements Serializable, Comparable<LinkTuple> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "LT_ID")
+    @Column(name = "lt_id")
     private Integer id;
 
-    @Column(name = "LT_FROM")
+    @Column(name = "lt_from")
     private String from;
 
-    @Column(name = "LT_TO")
+    @Column(name = "lt_to")
     private String to;
 
-    @Column(name = "LT_REL")
+    @Column(name = "lt_rel")
     private String rel;
 
-    @Column(name = "LT_LINK_TYPE")
+    @Column(name = "lt_link_type")
     @Enumerated(EnumType.ORDINAL)
     private LinkType linkType;
 
