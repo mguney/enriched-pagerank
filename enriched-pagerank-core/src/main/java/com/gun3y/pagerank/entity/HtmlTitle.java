@@ -13,7 +13,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Entity
-@Table(name = "HTML_TITLE", schema = "pagerank")
+@Table(name = "html_title", schema = "pagerank")
 public class HtmlTitle implements Serializable {
 
     private static final long serialVersionUID = 5620008418277465565L;

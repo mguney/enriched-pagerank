@@ -16,7 +16,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Entity
-@Table(name = "LINK_TUPLE", schema = "pagerank")
+@Table(name = "link_tuple", schema = "pagerank")
 public class LinkTuple implements Serializable, Comparable<LinkTuple> {
 
     private static final long serialVersionUID = -3980877700782161276L;
