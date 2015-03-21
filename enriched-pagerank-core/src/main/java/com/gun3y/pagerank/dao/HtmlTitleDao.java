@@ -36,7 +36,7 @@ public class HtmlTitleDao {
     }
 
     public void removeAll() {
-        this.executeSqlQuery("truncate table HTML_TITLE");
+        this.executeSqlQuery("truncate table html_title");
     }
 
     public List<HtmlTitle> findHtmlTitleByTitle(String title) {
@@ -44,16 +44,16 @@ public class HtmlTitleDao {
             return Collections.emptyList();
         }
         String query = "select ht_title as stemmedTitle, ht_url as url from html_title where instr('" + title.replace("'", "''")
-                + "', ht_title) and ht_title in (select distinct lt_rel from link_tuple where LT_LINK_TYPE = 1);";
+                + "', ht_title) and ht_title in (select distinct lt_rel from link_tuple where lt_link_type = 1);";
 
         return this.executeSqlSelect(query);
     }
 
     public int removeDuplicates(int minOccurs) {
         StringBuilder builder = new StringBuilder();
-        builder.append("delete a from HTML_TITLE as a join ")
-                .append("(SELECT HT_TITLE FROM HTML_TITLE group by HT_TITLE having count(*) > " + minOccurs + ") as b ")
-                .append("on b.HT_TITLE= a.HT_TITLE;");
+        builder.append("delete a from html_title as a join ")
+        .append("(SELECT ht_title FROM html_title group by ht_title having count(*) > " + minOccurs + ") as b ")
+        .append("on b.ht_title= a.ht_title;");
         return this.executeSqlQuery(builder.toString());
     }
 

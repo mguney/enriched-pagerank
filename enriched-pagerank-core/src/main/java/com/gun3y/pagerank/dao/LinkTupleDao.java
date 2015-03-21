@@ -47,7 +47,7 @@ public class LinkTupleDao {
             return -1;
         }
 
-        return this.executeCount("select count(*) from LinkTuple where LT_LINK_TYPE = " + linkType.ordinal());
+        return this.executeCount("select count(*) from LinkTuple where lt_link_type = " + linkType.ordinal());
     }
 
     public synchronized long count(LinkTuple linkTuple) {
@@ -56,9 +56,9 @@ public class LinkTupleDao {
         }
 
         StringBuilder builder = new StringBuilder();
-        builder.append("select count(*) from LinkTuple where ").append("LT_FROM ='").append(linkTuple.getFrom()).append("' and ")
-        .append("LT_TO ='").append(linkTuple.getTo()).append("' and ").append("LT_LINK_TYPE= ")
-        .append(linkTuple.getLinkType().ordinal()).append(" and LT_REL = '")
+        builder.append("select count(*) from LinkTuple where ").append("lt_from ='").append(linkTuple.getFrom()).append("' and ")
+        .append("lt_to ='").append(linkTuple.getTo()).append("' and ").append("lt_link_type= ")
+        .append(linkTuple.getLinkType().ordinal()).append(" and lt_rel = '")
         .append(StringUtils.replace(linkTuple.getRel(), "'", "''")).append("'");
 
         return this.executeCount(builder.toString());
@@ -95,8 +95,8 @@ public class LinkTupleDao {
             return -1;
         }
 
-        String query = "delete a from link_tuple as a join " + "(select LT_FROM, LT_TO, LT_REL from link_tuple where LT_LINK_TYPE = "
-                + linkType.ordinal() + " group by LT_FROM, LT_TO, LT_REL having count(*) < " + minOccurs + ") as b "
+        String query = "delete a from link_tuple as a join " + "(select lt_from, lt_to, lt_rel from link_tuple where lt_link_type = "
+                + linkType.ordinal() + " group by lt_from, lt_to, lt_rel having count(*) < " + minOccurs + ") as b "
                 + "on a.lt_from = b.lt_from and a.lt_to = b.lt_to and a.lt_rel = b.lt_rel;";
 
         return this.executeSqlQuery(query);
@@ -133,7 +133,7 @@ public class LinkTupleDao {
 
         Set<HtmlTitle> titleSet = new HashSet<HtmlTitle>();
 
-        List<LinkTuple> tuples = (List<LinkTuple>) this.executeSelect("from LinkTuple where LT_LINK_TYPE = "
+        List<LinkTuple> tuples = (List<LinkTuple>) this.executeSelect("from LinkTuple where lt_link_type = "
                 + LinkType.ImplicitLink.ordinal());
 
         tuples.forEach(a -> titleSet.add(new HtmlTitle(a.getRel(), a.getTo())));
@@ -153,7 +153,7 @@ public class LinkTupleDao {
      * linkType.ordinal()); }
      */
     public synchronized void removeAll() {
-        this.executeSqlQuery("truncate table LINK_TUPLE");
+        this.executeSqlQuery("truncate table link_tuple");
         // this.executeSqlQuery("truncate table LINK_TUPLE_COUNT");
     }
 
