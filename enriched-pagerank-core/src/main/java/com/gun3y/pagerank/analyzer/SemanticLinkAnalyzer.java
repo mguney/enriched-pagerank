@@ -35,17 +35,24 @@ public class SemanticLinkAnalyzer extends AbstractLinkAnalyzer {
 
         Iterator<EnhancedHtmlPage> ePageIterator = this.htmlPageDao.getHtmlPageIterator();
 
-        // Set<HtmlTitle> uniqueTitles = this.linkTupleDao.findAllTitles();
-        // TODO burda unique ttitle alıyordu eskiden
+        int retCode = 0;
         while (ePageIterator.hasNext()) {
             if (Thread.currentThread().isInterrupted() || this.isInterupted()) {
+                LOGGER.error("An error has been occured");
                 return;
             }
             EnhancedHtmlPage ePage = ePageIterator.next();
-            this.putPage(ePage);
+            retCode = this.putPage(ePage);
+            if (retCode < 0) {
+                LOGGER.error("An error has been occured");
+                return;
+            }
         }
-
-        this.waitForWorkQueue();
+        retCode = this.waitForWorkQueue();
+        if (retCode < 0) {
+            LOGGER.error("An error has been occured");
+            return;
+        }
         pageTimer.stop();
         LOGGER.info("SemanticLinks (Total: {}) has been created in {}ms", this.linkTupleDao.count(LinkType.SemanticLink),
                 pageTimer.getTime());

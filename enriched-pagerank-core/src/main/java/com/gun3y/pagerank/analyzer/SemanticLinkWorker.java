@@ -85,20 +85,13 @@ class SemanticLinkWorker extends LinkWorker {
             return retTuples;
         }
 
-        try {
-            for (LineItem lineItem : lines) {
-                List<LineItem> items = this.extractSentences(lineItem);
+        for (LineItem lineItem : lines) {
+            List<LineItem> items = this.extractSentences(lineItem);
 
-                for (LineItem item : items) {
-                    List<LinkTuple> tuples = this.executeLineItem(item);
-                    retTuples.addAll(tuples);
-                }
+            for (LineItem item : items) {
+                List<LinkTuple> tuples = this.executeLineItem(item);
+                retTuples.addAll(tuples);
             }
-        }
-        catch (Throwable e) {
-            Thread.currentThread().interrupt();
-            LOGGER.error(e.getMessage(), e);
-            return retTuples;
         }
 
         return retTuples;
@@ -288,7 +281,7 @@ class SemanticLinkWorker extends LinkWorker {
 
         List<IndexedWord> subList = vertexListSorted.subList(indexOfSubList, indexOfSubList + tokens.size());
 
-        return subList.stream()
+        return subList.stream().filter(a -> semanticGraph.getPathToRoot(a) != null)
                 .min((a, b) -> Integer.compare(semanticGraph.getPathToRoot(a).size(), semanticGraph.getPathToRoot(b).size())).get();
 
     }
@@ -301,13 +294,14 @@ class SemanticLinkWorker extends LinkWorker {
         PairWord accPairWord = this.newPairWord(pairWord);
 
         List<SemanticGraphEdge> edges = semanticGraph.getShortestUndirectedPathEdges(accPairWord.firstWord, accPairWord.secondWord);
-        LOGGER.debug("From " + accPairWord.firstWord + " to " + accPairWord.secondWord + "  edges ----> " + edges.toString());
 
         Triple<GrammaticalRelation, IndexedWord, GrammaticalRelation> rootWord = null;
 
         if (edges == null || edges.size() < 2) {
+            LOGGER.debug("From " + accPairWord.firstWord + " to " + accPairWord.secondWord + "  edges ----> NO EDGE !");
             return null;
         }
+        LOGGER.debug("From " + accPairWord.firstWord + " to " + accPairWord.secondWord + "  edges ----> " + edges.toString());
 
         SemanticGraphEdge fEdge = edges.get(0);
 

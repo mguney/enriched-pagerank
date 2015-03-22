@@ -1,5 +1,7 @@
 package com.gun3y.pagerank.analyzer;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -68,28 +70,36 @@ abstract class AbstractLinkAnalyzer {
 
     public abstract void analyze();
 
-    protected void putPage(EnhancedHtmlPage ePage) {
+    protected int putPage(EnhancedHtmlPage ePage) {
         try {
             this.workQueue.put(ePage);
+            return 0;
         }
         catch (Throwable ex) {
-            LOGGER.error(ex.getMessage());
+            StringWriter sw = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sw));
+            LOGGER.error(sw.toString());
             Thread.currentThread().interrupt();
+            return -1;
         }
     }
 
-    protected void waitForWorkQueue() {
+    protected int waitForWorkQueue() {
         while (!this.workQueue.isEmpty() || this.counter.get() != 0) {
             try {
                 Thread.sleep(200);
             }
-            catch (Throwable e) {
-                LOGGER.error(e.getMessage());
+            catch (Throwable ex) {
+                StringWriter sw = new StringWriter();
+                ex.printStackTrace(new PrintWriter(sw));
+                LOGGER.error(sw.toString());
                 Thread.currentThread().interrupt();
+                return -1;
             }
         }
 
         this.clearQueue();
+        return 0;
     }
 
     protected void clearQueue() {

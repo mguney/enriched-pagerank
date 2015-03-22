@@ -1,5 +1,7 @@
 package com.gun3y.pagerank.analyzer;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -50,9 +52,10 @@ abstract class LinkWorker implements Runnable {
                 LOGGER.info("{}: Links: {}", htmlPage.getUrl(), linkTuples.size());
             }
             catch (Throwable ex) {
-                Thread.currentThread().interrupt();
-                LOGGER.error(ex.getMessage());
-                break;
+                StringWriter sw = new StringWriter();
+                ex.printStackTrace(new PrintWriter(sw));
+                LOGGER.error(sw.toString());
+                return;
             }
         }
     }

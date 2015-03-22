@@ -33,6 +33,8 @@ public class ExplicitLinkAnalyzer extends AbstractLinkAnalyzer {
         LOGGER.info("Analyzing explicit links...");
         pageTimer.start();
 
+        int retCode = 0;
+
         Iterator<EnhancedHtmlPage> ePageIterator = this.htmlPageDao.getHtmlPageIterator();
         while (ePageIterator.hasNext()) {
 
@@ -59,10 +61,17 @@ public class ExplicitLinkAnalyzer extends AbstractLinkAnalyzer {
                 }
             }
 
-            this.putPage(ePage);
+            retCode = this.putPage(ePage);
+            if (retCode < 0) {
+                LOGGER.error("An error has been occured");
+                return;
+            }
         }
-
-        this.waitForWorkQueue();
+        retCode = this.waitForWorkQueue();
+        if (retCode < 0) {
+            LOGGER.error("An error has been occured");
+            return;
+        }
 
         pageTimer.stop();
 

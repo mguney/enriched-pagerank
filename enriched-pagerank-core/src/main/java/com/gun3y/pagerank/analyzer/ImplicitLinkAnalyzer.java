@@ -39,12 +39,20 @@ public class ImplicitLinkAnalyzer extends AbstractLinkAnalyzer {
         pageTimer.start();
 
         Iterator<EnhancedHtmlPage> ePageIterator = this.htmlPageDao.getHtmlPageIterator();
+        int retCode = 0;
         while (ePageIterator.hasNext()) {
             EnhancedHtmlPage ePage = ePageIterator.next();
-            this.putPage(ePage);
+            retCode = this.putPage(ePage);
+            if (retCode < 0) {
+                LOGGER.error("An error has been occured");
+                return;
+            }
         }
-
-        this.waitForWorkQueue();
+        retCode = this.waitForWorkQueue();
+        if (retCode < 0) {
+            LOGGER.error("An error has been occured");
+            return;
+        }
 
         pageTimer.stop();
         LOGGER.info("ImplicitLinks (Total: {}) has been created in {}ms", this.linkTupleDao.count(LinkType.ImplicitLink),
