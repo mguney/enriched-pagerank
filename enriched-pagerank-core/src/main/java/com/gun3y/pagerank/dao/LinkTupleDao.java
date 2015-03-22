@@ -57,9 +57,9 @@ public class LinkTupleDao {
 
         StringBuilder builder = new StringBuilder();
         builder.append("select count(*) from LinkTuple where ").append("lt_from ='").append(linkTuple.getFrom()).append("' and ")
-        .append("lt_to ='").append(linkTuple.getTo()).append("' and ").append("lt_link_type= ")
-        .append(linkTuple.getLinkType().ordinal()).append(" and lt_rel = '")
-        .append(StringUtils.replace(linkTuple.getRel(), "'", "''")).append("'");
+                .append("lt_to ='").append(linkTuple.getTo()).append("' and ").append("lt_link_type= ")
+                .append(linkTuple.getLinkType().ordinal()).append(" and lt_rel = '")
+                .append(StringUtils.replace(linkTuple.getRel(), "'", "''")).append("'");
 
         return this.executeCount(builder.toString());
     }
@@ -69,7 +69,7 @@ public class LinkTupleDao {
             return -1;
         }
 
-        Session session = HibernateUtils.getSessionFactory().getCurrentSession();
+        Session session = HibernateUtils.getCurrentSession();
         int retults;
         try {
             session.getTransaction().begin();
@@ -179,7 +179,7 @@ public class LinkTupleDao {
     }
 
     private void executeInsert(LinkTuple linkTuple) {
-        Session session = HibernateUtils.getSessionFactory().getCurrentSession();
+        Session session = HibernateUtils.getCurrentSession();
         try {
             session.getTransaction().begin();
 
@@ -194,7 +194,7 @@ public class LinkTupleDao {
     }
 
     private int executeSqlQuery(String query) {
-        Session session = HibernateUtils.getSessionFactory().getCurrentSession();
+        Session session = HibernateUtils.getCurrentSession();
         int retults;
         try {
             session.getTransaction().begin();
@@ -212,7 +212,7 @@ public class LinkTupleDao {
     }
 
     private List<?> executeSelect(String query) {
-        Session session = HibernateUtils.getSessionFactory().getCurrentSession();
+        Session session = HibernateUtils.getCurrentSession();
         List<?> retults;
         try {
             session.getTransaction().begin();
@@ -230,7 +230,7 @@ public class LinkTupleDao {
     }
 
     private long executeCount(String query) {
-        Session session = HibernateUtils.getSessionFactory().getCurrentSession();
+        Session session = HibernateUtils.getCurrentSession();
         long count;
         try {
             session.getTransaction().begin();

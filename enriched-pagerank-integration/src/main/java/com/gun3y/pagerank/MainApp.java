@@ -148,7 +148,7 @@ public class MainApp {
             e.printStackTrace();
         }
         finally {
-            HibernateUtils.getSessionFactory().close();
+            HibernateUtils.shutdown();
         }
         System.out.println(Calendar.getInstance().getTime());
     }

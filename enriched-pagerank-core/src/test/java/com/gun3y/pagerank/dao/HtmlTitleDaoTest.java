@@ -20,7 +20,7 @@ public class HtmlTitleDaoTest {
 
     @AfterClass
     public static void tearDownAfterClass() throws Exception {
-        HibernateUtils.getSessionFactory().close();
+        HibernateUtils.shutdown();
     }
 
     @Before

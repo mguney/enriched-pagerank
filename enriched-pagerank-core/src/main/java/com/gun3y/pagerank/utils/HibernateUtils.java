@@ -1,10 +1,16 @@
 package com.gun3y.pagerank.utils;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 
 public class HibernateUtils {
+
+    private static Map<Long, Session> sessionMap = new ConcurrentHashMap<Long, Session>();
 
     private static final SessionFactory sessionFactory = buildSessionFactory();
 
@@ -22,8 +28,30 @@ public class HibernateUtils {
         }
     }
 
+    public synchronized static Session getCurrentSession() {
+        long id = Thread.currentThread().getId();
+
+        if (sessionMap.containsKey(id)) {
+            return sessionMap.get(id);
+        }
+        else {
+            Session session = sessionFactory.openSession();
+            sessionMap.put(id, session);
+            return session;
+        }
+    }
+
+    public synchronized static void shutdown() {
+        sessionMap.entrySet().stream().forEach(a -> a.getValue().close());
+        sessionFactory.close();
+    }
+
     public static SessionFactory getSessionFactory() {
         return sessionFactory;
+    }
+
+    public static int getSessionCount() {
+        return sessionMap.size();
     }
 
 }

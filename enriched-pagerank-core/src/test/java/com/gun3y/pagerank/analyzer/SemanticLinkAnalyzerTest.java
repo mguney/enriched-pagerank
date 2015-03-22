@@ -39,7 +39,7 @@ public class SemanticLinkAnalyzerTest {
         }
         System.out.println(analyze.size());
         analyzer.shutdown();
-        HibernateUtils.getSessionFactory().close();
+        HibernateUtils.shutdown();
     }
 
     public static void main22(String[] args) throws IOException {
@@ -65,6 +65,6 @@ public class SemanticLinkAnalyzerTest {
         }
         System.out.println(analyze.size());
         analyzer.shutdown();
-        HibernateUtils.getSessionFactory().close();
+        HibernateUtils.shutdown();
     }
 }

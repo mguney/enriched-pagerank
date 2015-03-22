@@ -57,7 +57,7 @@ public class LinkTupleDaoTest {
             System.out.println(applySameUrlFilter + "  time " + timer.getTime());
         }
         finally {
-            HibernateUtils.getSessionFactory().close();
+            HibernateUtils.shutdown();
         }
 
     }
@@ -82,7 +82,7 @@ public class LinkTupleDaoTest {
             System.out.println("add ends " + timer.getTime());
         }
         finally {
-            HibernateUtils.getSessionFactory().close();
+            HibernateUtils.shutdown();
         }
     }
 }
