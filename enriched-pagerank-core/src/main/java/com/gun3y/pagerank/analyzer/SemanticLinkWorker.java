@@ -281,8 +281,15 @@ class SemanticLinkWorker extends LinkWorker {
 
         List<IndexedWord> subList = vertexListSorted.subList(indexOfSubList, indexOfSubList + tokens.size());
 
-        return subList.stream().filter(a -> semanticGraph.getPathToRoot(a) != null)
-                .min((a, b) -> Integer.compare(semanticGraph.getPathToRoot(a).size(), semanticGraph.getPathToRoot(b).size())).get();
+        return subList.stream().map(a -> {
+            List<IndexedWord> pathToRoot = semanticGraph.getPathToRoot(a);
+            if (pathToRoot == null) {
+                return new Pair<IndexedWord, Integer>(a, Integer.MAX_VALUE);
+            }
+            else {
+                return new Pair<IndexedWord, Integer>(a, pathToRoot.size());
+            }
+        }).min((a, b) -> Integer.compare(a.second, b.second)).get().first;
 
     }
 
