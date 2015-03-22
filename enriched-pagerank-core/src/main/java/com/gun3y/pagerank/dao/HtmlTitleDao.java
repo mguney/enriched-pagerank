@@ -27,11 +27,11 @@ public class HtmlTitleDao {
     }
 
     @SuppressWarnings("unchecked")
-    public synchronized Set<HtmlTitle> getHtmlTitleSet() {
+    public Set<HtmlTitle> getHtmlTitleSet() {
         return new HashSet<HtmlTitle>((List<HtmlTitle>) this.executeSelect("from HtmlTitle"));
     }
 
-    public synchronized long count() {
+    public long count() {
         return this.executeCount("select count(*) from HtmlTitle");
     }
 
@@ -39,7 +39,7 @@ public class HtmlTitleDao {
         this.executeSqlQuery("truncate table html_title");
     }
 
-    public synchronized List<HtmlTitle> findHtmlTitleByTitle(String title) {
+    public List<HtmlTitle> findHtmlTitleByTitle(String title) {
         if (StringUtils.isBlank(title)) {
             return Collections.emptyList();
         }
@@ -52,8 +52,8 @@ public class HtmlTitleDao {
     public synchronized int removeDuplicates(int minOccurs) {
         StringBuilder builder = new StringBuilder();
         builder.append("delete a from html_title as a join ")
-                .append("(SELECT ht_title FROM html_title group by ht_title having count(*) > " + minOccurs + ") as b ")
-                .append("on b.ht_title= a.ht_title;");
+        .append("(SELECT ht_title FROM html_title group by ht_title having count(*) > " + minOccurs + ") as b ")
+        .append("on b.ht_title= a.ht_title;");
         return this.executeSqlQuery(builder.toString());
     }
 
@@ -93,14 +93,9 @@ public class HtmlTitleDao {
         Session session = HibernateUtils.getSessionFactory().getCurrentSession();
         List<?> retults;
         try {
-            session.getTransaction().begin();
-
             retults = session.createQuery(query).list();
-
-            session.getTransaction().commit();
         }
         catch (RuntimeException e) {
-            session.getTransaction().rollback();
             throw e;
         }
 
@@ -112,14 +107,9 @@ public class HtmlTitleDao {
         Session session = HibernateUtils.getSessionFactory().getCurrentSession();
         List<HtmlTitle> retults;
         try {
-            session.getTransaction().begin();
-
             retults = session.createSQLQuery(query).setResultTransformer(Transformers.aliasToBean(HtmlTitle.class)).list();
-
-            session.getTransaction().commit();
         }
         catch (RuntimeException e) {
-            session.getTransaction().rollback();
             throw e;
         }
 
@@ -130,14 +120,9 @@ public class HtmlTitleDao {
         Session session = HibernateUtils.getSessionFactory().getCurrentSession();
         long count;
         try {
-            session.getTransaction().begin();
-
             count = (long) session.createQuery(query).uniqueResult();
-
-            session.getTransaction().commit();
         }
         catch (RuntimeException e) {
-            session.getTransaction().rollback();
             throw e;
         }
 
