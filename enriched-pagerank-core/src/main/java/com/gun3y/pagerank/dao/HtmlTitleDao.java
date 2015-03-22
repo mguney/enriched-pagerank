@@ -18,7 +18,7 @@ public class HtmlTitleDao {
 
     }
 
-    public void addHtmlTitle(HtmlTitle htmlTitle) {
+    public synchronized void addHtmlTitle(HtmlTitle htmlTitle) {
         if (htmlTitle == null || StringUtils.isBlank(htmlTitle.getStemmedTitle()) || StringUtils.isBlank(htmlTitle.getUrl())) {
             return;
         }
@@ -27,19 +27,19 @@ public class HtmlTitleDao {
     }
 
     @SuppressWarnings("unchecked")
-    public Set<HtmlTitle> getHtmlTitleSet() {
+    public synchronized Set<HtmlTitle> getHtmlTitleSet() {
         return new HashSet<HtmlTitle>((List<HtmlTitle>) this.executeSelect("from HtmlTitle"));
     }
 
-    public long count() {
+    public synchronized long count() {
         return this.executeCount("select count(*) from HtmlTitle");
     }
 
-    public void removeAll() {
+    public synchronized void removeAll() {
         this.executeSqlQuery("truncate table html_title");
     }
 
-    public List<HtmlTitle> findHtmlTitleByTitle(String title) {
+    public synchronized List<HtmlTitle> findHtmlTitleByTitle(String title) {
         if (StringUtils.isBlank(title)) {
             return Collections.emptyList();
         }
@@ -49,11 +49,11 @@ public class HtmlTitleDao {
         return this.executeSqlSelect(query);
     }
 
-    public int removeDuplicates(int minOccurs) {
+    public synchronized int removeDuplicates(int minOccurs) {
         StringBuilder builder = new StringBuilder();
         builder.append("delete a from html_title as a join ")
-        .append("(SELECT ht_title FROM html_title group by ht_title having count(*) > " + minOccurs + ") as b ")
-        .append("on b.ht_title= a.ht_title;");
+                .append("(SELECT ht_title FROM html_title group by ht_title having count(*) > " + minOccurs + ") as b ")
+                .append("on b.ht_title= a.ht_title;");
         return this.executeSqlQuery(builder.toString());
     }
 
