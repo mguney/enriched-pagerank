@@ -59,7 +59,7 @@ public class LinkTupleDao {
         builder.append("select count(*) from LinkTuple where ").append("lt_from ='").append(linkTuple.getFrom()).append("' and ")
                 .append("lt_to ='").append(linkTuple.getTo()).append("' and ").append("lt_link_type= ")
                 .append(linkTuple.getLinkType().ordinal()).append(" and lt_rel = '")
-                .append(StringUtils.replace(linkTuple.getRel(), "'", "''")).append("'");
+        .append(StringUtils.replace(linkTuple.getRel(), "'", "''")).append("'");
 
         return this.executeCount(builder.toString());
     }

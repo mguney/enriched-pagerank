@@ -16,20 +16,9 @@ import edu.stanford.nlp.util.CoreMap;
 
 public class LangUtils {
 
-    // private static final Logger LOGGER =
-    // LoggerFactory.getLogger(LangUtils.class);
-
-    // public static final CharArraySet STOPWORDS_EN = new CharArraySet(20,
-    // true);
-
-    private static StanfordCoreNLP PIPELINE;
-
-    // TODO: şimdilik gerek yok gibi
-    // private static String[] SPECIAL_CHARS = new String[] { "-rcb-", "-rsb",
-    // "-rrb-", "-lrb-", "-lsb-", "-lcb-" };
+    private static StanfordCoreNLP PIPELINE;;
 
     static {
-        // loadStopWords(STOPWORDS_EN);
 
         Properties props = new Properties();
         props.put("annotators", "tokenize, ssplit, pos, lemma");
@@ -87,39 +76,12 @@ public class LangUtils {
         return results;
     }
 
-    // private static void loadStopWords(CharArraySet set) {
-    // File stopwordFolder = getFile("stopwords");
-    //
-    // if (stopwordFolder.isDirectory()) {
-    // File[] files = stopwordFolder.listFiles(new FilenameFilter() {
-    // @Override
-    // public boolean accept(File dir, String name) {
-    // return name.endsWith("en.txt");
-    // }
-    // });
-    //
-    // if (files == null) {
-    // return;
-    // }
-    // for (File f : files) {
-    // try {
-    // WordlistLoader.getWordSet(new FileReader(f), set);
-    // }
-    // catch (IOException e) {
-    // LOGGER.error(e.getMessage());
-    // }
-    // }
-    //
-    // }
-    // }
+    public static String escapeSql(String text) {
+        if (text == null) {
+            return StringUtils.EMPTY;
+        }
 
-    // private static File getFile(String fileName) {
-    // if (StringUtils.isBlank(fileName)) {
-    // throw new IllegalArgumentException("FileName cannot be empty");
-    // }
-    //
-    // URL url = LangUtils.class.getClassLoader().getResource(fileName);
-    // return new File(url.getPath());
-    // }
+        return text.replace("'", "").replace("{", "");
+    }
 
 }

@@ -11,6 +11,7 @@ import org.hibernate.transform.Transformers;
 
 import com.gun3y.pagerank.entity.HtmlTitle;
 import com.gun3y.pagerank.utils.HibernateUtils;
+import com.gun3y.pagerank.utils.LangUtils;
 
 public class HtmlTitleDao {
 
@@ -39,11 +40,18 @@ public class HtmlTitleDao {
         this.executeSqlQuery("truncate table html_title");
     }
 
+    public static void main(String[] args) {
+        HtmlTitleDao dao = new HtmlTitleDao();
+        dao.findHtmlTitleByTitle("pass a category by parameter <includeonly> -lsb- -lsb- category :{ -lcb- -lcb- cat | default -rcb- -rcb- -rcb- -rsb- -rsb- </includeonly> or <includeonly> -lcb- -lcb- -lcb- cat | -lsb- -lsb- category : default -rsb- -rsb- -rcb- -rcb- -rcb- </includeonly>");
+
+        HibernateUtils.shutdown();
+    }
+
     public List<HtmlTitle> findHtmlTitleByTitle(String title) {
         if (StringUtils.isBlank(title)) {
             return Collections.emptyList();
         }
-        String query = "select ht_title as stemmedTitle, ht_url as url from html_title where instr('" + title.replace("'", "''")
+        String query = "select ht_title as stemmedTitle, ht_url as url from html_title where instr('" + LangUtils.escapeSql(title)
                 + "', ht_title) and ht_title in (select distinct lt_rel from link_tuple where lt_link_type = 1);";
 
         return this.executeSqlSelect(query);
@@ -52,8 +60,8 @@ public class HtmlTitleDao {
     public synchronized int removeDuplicates(int minOccurs) {
         StringBuilder builder = new StringBuilder();
         builder.append("delete a from html_title as a join ")
-        .append("(SELECT ht_title FROM html_title group by ht_title having count(*) > " + minOccurs + ") as b ")
-        .append("on b.ht_title= a.ht_title;");
+                .append("(SELECT ht_title FROM html_title group by ht_title having count(*) > " + minOccurs + ") as b ")
+                .append("on b.ht_title= a.ht_title;");
         return this.executeSqlQuery(builder.toString());
     }
 
