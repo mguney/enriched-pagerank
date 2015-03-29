@@ -14,17 +14,37 @@ import com.gun3y.pagerank.dao.LinkTupleDao;
 import com.gun3y.pagerank.entity.EnhancedHtmlPage;
 import com.gun3y.pagerank.entity.LinkType;
 
+import edu.emory.clir.clearnlp.component.AbstractComponent;
+import edu.emory.clir.clearnlp.component.mode.dep.DEPConfiguration;
+import edu.emory.clir.clearnlp.component.utils.NLPUtils;
+import edu.emory.clir.clearnlp.tokenization.AbstractTokenizer;
+import edu.emory.clir.clearnlp.util.lang.TLanguage;
+
 public class SemanticLinkAnalyzer extends AbstractLinkAnalyzer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SemanticLinkAnalyzer.class);
 
+    private AbstractComponent[] components;
+
+    private AbstractTokenizer tokenizer;
+
     public SemanticLinkAnalyzer(int numWorkers, HtmlTitleDao htmlTitleDao, EnhancedHtmlPageDao htmlPageDao, LinkTupleDao linkTupleDao) {
         super(numWorkers, htmlTitleDao, htmlPageDao, linkTupleDao);
+
+        final String rootLabel = "root"; // root label for dependency parsing
+
+        AbstractComponent morph = NLPUtils.getMPAnalyzer(TLanguage.ENGLISH);
+        AbstractComponent tagger = NLPUtils.getPOSTagger(TLanguage.ENGLISH, "general-en-pos.xz");
+        AbstractComponent parser = NLPUtils.getDEPParser(TLanguage.ENGLISH, "general-en-dep.xz", new DEPConfiguration(rootLabel));
+
+        this.components = new AbstractComponent[] { tagger, morph, parser };
+        this.tokenizer = NLPUtils.getTokenizer(TLanguage.ENGLISH);
     }
 
     @Override
     protected LinkWorker newLinkWorker(int id, BlockingQueue<EnhancedHtmlPage> workQueue, AtomicInteger counter, LinkTupleDao linkTupleDao) {
-        return new SemanticLinkWorker("SemLinkWorker#" + id, workQueue, counter, linkTupleDao, this.htmlTitleDao);
+        return new SemanticLinkWorker2("SemLinkWorker#" + id, workQueue, counter, linkTupleDao, this.htmlTitleDao, this.tokenizer,
+                this.components);
     }
 
     @Override

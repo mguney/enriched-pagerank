@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.emory.clir.clearnlp.dependency.DEPTree;
+
 public class LineItem implements Serializable {
 
     private static final long serialVersionUID = 4505341851671159100L;
@@ -11,6 +13,16 @@ public class LineItem implements Serializable {
     Map<String, String> urls = new HashMap<String, String>();
 
     String line;
+
+    DEPTree tree;
+
+    public DEPTree getTree() {
+        return this.tree;
+    }
+
+    public void setTree(DEPTree tree) {
+        this.tree = tree;
+    }
 
     public Map<String, String> getUrls() {
         return this.urls;
@@ -31,5 +43,11 @@ public class LineItem implements Serializable {
     public LineItem(String text, Map<String, String> map) {
         this.line = text;
         this.urls = map;
+    }
+
+    public LineItem(String text, Map<String, String> map, DEPTree tree) {
+        this.line = text;
+        this.urls = map;
+        this.tree = tree;
     }
 }

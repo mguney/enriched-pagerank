@@ -56,5 +56,21 @@
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>edu.emory.clir</groupId>
+			<artifactId>clearnlp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>edu.emory.clir</groupId>
+			<artifactId>clearnlp-dictionary</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>edu.emory.clir</groupId>
+			<artifactId>clearnlp-general-en-pos</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>edu.emory.clir</groupId>
+			<artifactId>clearnlp-general-en-dep</artifactId>
+		</dependency>
 	</dependencies>
 </project>

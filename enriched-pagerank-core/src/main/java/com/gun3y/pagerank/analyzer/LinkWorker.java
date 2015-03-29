@@ -34,7 +34,7 @@ abstract class LinkWorker implements Runnable {
 
     }
 
-    public abstract List<LinkTuple> analyze(EnhancedHtmlPage htmlPage);
+    public abstract List<LinkTuple> analyze(EnhancedHtmlPage htmlPage) throws Exception;
 
     @Override
     public void run() {
