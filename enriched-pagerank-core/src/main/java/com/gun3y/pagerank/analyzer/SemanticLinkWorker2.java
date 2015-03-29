@@ -560,6 +560,9 @@ class SemanticLinkWorker2 extends LinkWorker {
     }
 
     private String printDepNode(DEPNode node) {
+        if (node == null) {
+            return "[NULL]";
+        }
         return node.getWordForm() + "(" + node.getID() + ":" + node.getPOSTag() + ")";
     }
 
