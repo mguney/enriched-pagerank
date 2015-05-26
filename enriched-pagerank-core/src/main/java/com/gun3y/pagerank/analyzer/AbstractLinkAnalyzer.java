@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gun3y.pagerank.dao.EnhancedHtmlPageDao;
+import com.gun3y.pagerank.common.EPRConstants;
 import com.gun3y.pagerank.dao.HtmlTitleDao;
 import com.gun3y.pagerank.dao.LinkTupleDao;
 import com.gun3y.pagerank.entity.EnhancedHtmlPage;
@@ -23,13 +23,7 @@ abstract class AbstractLinkAnalyzer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLinkAnalyzer.class);
 
-    protected static final int MAX_STEM_COUNT = 5;
-
-    protected static final int MIN_LINK_OCCURS = 5;
-
     protected HtmlTitleDao htmlTitleDao;
-
-    protected EnhancedHtmlPageDao htmlPageDao;
 
     protected LinkTupleDao linkTupleDao;
 
@@ -43,13 +37,12 @@ abstract class AbstractLinkAnalyzer {
 
     private final AtomicInteger counter;
 
-    public AbstractLinkAnalyzer(int numWorkers, HtmlTitleDao htmlTitleDao, EnhancedHtmlPageDao htmlPageDao, LinkTupleDao linkTupleDao) {
+    public AbstractLinkAnalyzer(int numWorkers, HtmlTitleDao htmlTitleDao, LinkTupleDao linkTupleDao) {
         if (numWorkers < 1) {
             throw new RuntimeException("Number of workers cannot be zero or less");
         }
 
         this.htmlTitleDao = htmlTitleDao;
-        this.htmlPageDao = htmlPageDao;
         this.linkTupleDao = linkTupleDao;
 
         this.numWorkers = numWorkers;
@@ -68,7 +61,9 @@ abstract class AbstractLinkAnalyzer {
     protected abstract LinkWorker newLinkWorker(int id, BlockingQueue<EnhancedHtmlPage> workQueue, AtomicInteger counter,
             LinkTupleDao linkTupleDao);
 
-    public abstract void analyze();
+    public abstract void push(EnhancedHtmlPage ePage);
+
+    public abstract void finish();
 
     protected int putPage(EnhancedHtmlPage ePage) {
         try {
@@ -116,7 +111,7 @@ abstract class AbstractLinkAnalyzer {
 
     protected String stem(String title) {
         List<String> stemmedWords = LangUtils.extractStemmedWords(title);
-        if (stemmedWords.size() >= MAX_STEM_COUNT) {
+        if (stemmedWords.size() >= EPRConstants.MAX_STEM_COUNT) {
             LOGGER.debug("[MAX_STEM_COUNT] - " + LangUtils.joinList(stemmedWords));
             return StringUtils.EMPTY;
         }

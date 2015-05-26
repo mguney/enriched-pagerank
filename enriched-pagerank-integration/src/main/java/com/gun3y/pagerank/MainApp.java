@@ -97,31 +97,31 @@ public class MainApp {
 
             switch (this.op) {
                 case Explicit:
-                    ExplicitLinkAnalyzer ex1 = new ExplicitLinkAnalyzer(this.thread, htmlTitleDao, eHtmlPageDao, linkTupleDao);
-                    ex1.analyze();
+                    ExplicitLinkAnalyzer ex1 = new ExplicitLinkAnalyzer(this.thread, htmlTitleDao, linkTupleDao);
+                    //                    ex1.analyze();
                     ex1.shutdown();
                     break;
                 case Implicit:
-                    ImplicitLinkAnalyzer im1 = new ImplicitLinkAnalyzer(this.thread, htmlTitleDao, eHtmlPageDao, linkTupleDao);
-                    im1.analyze();
+                    ImplicitLinkAnalyzer im1 = new ImplicitLinkAnalyzer(this.thread, htmlTitleDao, linkTupleDao);
+                    //                    im1.analyze();
                     im1.shutdown();
                     break;
                 case Semantic:
-                    SemanticLinkAnalyzer sem1 = new SemanticLinkAnalyzer(this.thread, htmlTitleDao, eHtmlPageDao, linkTupleDao);
-                    sem1.analyze();
+                    SemanticLinkAnalyzer sem1 = new SemanticLinkAnalyzer(this.thread, htmlTitleDao, linkTupleDao);
+                    //                    sem1.analyze();
                     sem1.shutdown();
                     break;
                 case All:
-                    ExplicitLinkAnalyzer ex2 = new ExplicitLinkAnalyzer(this.thread, htmlTitleDao, eHtmlPageDao, linkTupleDao);
-                    ex2.analyze();
+                    ExplicitLinkAnalyzer ex2 = new ExplicitLinkAnalyzer(this.thread, htmlTitleDao, linkTupleDao);
+                    //                    ex2.analyze();
                     ex2.shutdown();
 
-                    ImplicitLinkAnalyzer im2 = new ImplicitLinkAnalyzer(this.thread, htmlTitleDao, eHtmlPageDao, linkTupleDao);
-                    im2.analyze();
+                    ImplicitLinkAnalyzer im2 = new ImplicitLinkAnalyzer(this.thread, htmlTitleDao, linkTupleDao);
+                    //                    im2.analyze();
                     im2.shutdown();
 
-                    SemanticLinkAnalyzer sem3 = new SemanticLinkAnalyzer(this.thread, htmlTitleDao, eHtmlPageDao, linkTupleDao);
-                    sem3.analyze();
+                    SemanticLinkAnalyzer sem3 = new SemanticLinkAnalyzer(this.thread, htmlTitleDao, linkTupleDao);
+                    //                    sem3.analyze();
                     sem3.shutdown();
 
                     break;

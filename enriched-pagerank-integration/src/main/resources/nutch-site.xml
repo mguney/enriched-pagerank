@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<!-- Put site-specific property overrides in this file. -->
+<configuration>
+	<property>
+		<name>plugin.folders</name>
+		<value>C:/Users/Mustafa/workspace/nutch/build/plugins</value>
+	</property>
+	<property>
+		<name>http.agent.name</name>
+		<value>orion-agent</value>
+	</property>
+	<property>
+		<name>fs.file.impl</name>
+		<value>com.gun3y.pagerank.nutch.hadoop.WinLocalFileSystem</value>
+		<description>Enables patch for issue HADOOP-7682 on Windows</description>
+	</property>
+	<property>
+		<name>plugin.includes</name>
+		<value>protocol-http|urlfilter-regex|parse-(html|tika)|index-(basic|anchor|html)|indexer-solr|scoring-opic|urlnormalizer-(pass|regex|basic)</value>
+	</property>
+	<property>
+		<name>solr.server.url</name>
+		<value>http://127.0.0.1:8983/solr</value>
+		<description> Defines the Solr URL into which data should be indexed using the indexer-solr plugin.
+		</description>
+	</property>
+</configuration>

@@ -1,18 +1,15 @@
 package com.gun3y.pagerank.analyzer;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gun3y.pagerank.dao.EnhancedHtmlPageDao;
 import com.gun3y.pagerank.dao.HtmlTitleDao;
 import com.gun3y.pagerank.dao.LinkTupleDao;
 import com.gun3y.pagerank.entity.EnhancedHtmlPage;
@@ -23,64 +20,53 @@ import com.gun3y.pagerank.entity.LinkType;
 public class ExplicitLinkAnalyzer extends AbstractLinkAnalyzer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExplicitLinkAnalyzer.class);
 
-    public ExplicitLinkAnalyzer(int numWorkers, HtmlTitleDao htmlTitleDao, EnhancedHtmlPageDao htmlPageDao, LinkTupleDao linkTupleDao) {
-        super(numWorkers, htmlTitleDao, htmlPageDao, linkTupleDao);
+    public ExplicitLinkAnalyzer(int numWorkers, HtmlTitleDao htmlTitleDao, LinkTupleDao linkTupleDao) {
+        super(numWorkers, htmlTitleDao, linkTupleDao);
     }
 
     @Override
-    public void analyze() {
-        StopWatch pageTimer = new StopWatch();
-        LOGGER.info("Analyzing explicit links...");
-        pageTimer.start();
+    public void push(EnhancedHtmlPage ePage) {
 
-        int retCode = 0;
+        String title = ePage.getTitle();
 
-        Iterator<EnhancedHtmlPage> ePageIterator = this.htmlPageDao.getHtmlPageIterator();
-        while (ePageIterator.hasNext()) {
+        String stemmedTitle = this.stem(title);
 
-            EnhancedHtmlPage ePage = ePageIterator.next();
+        String url = ePage.getUrl();
 
-            String title = ePage.getTitle();
+        if (StringUtils.isNotBlank(stemmedTitle)) {
+            this.htmlTitleDao.addHtmlTitle(new HtmlTitle(stemmedTitle, url));
+        }
 
-            String stemmedTitle = this.stem(title);
+        Set<String> anchors = ePage.getAnchors();
 
-            String url = ePage.getUrl();
-
-            if (StringUtils.isNotBlank(stemmedTitle)) {
-                this.htmlTitleDao.addHtmlTitle(new HtmlTitle(stemmedTitle, url));
-            }
-
-            Set<String> anchors = ePage.getAnchors();
-
-            if (anchors != null) {
-                for (String anchor : anchors) {
-                    String stemmedAnchor = this.stem(anchor);
-                    if (StringUtils.isNotBlank(stemmedAnchor)) {
-                        this.htmlTitleDao.addHtmlTitle(new HtmlTitle(stemmedAnchor, url));
-                    }
+        if (anchors != null) {
+            for (String anchor : anchors) {
+                String stemmedAnchor = this.stem(anchor);
+                if (StringUtils.isNotBlank(stemmedAnchor)) {
+                    this.htmlTitleDao.addHtmlTitle(new HtmlTitle(stemmedAnchor, url));
                 }
             }
-
-            retCode = this.putPage(ePage);
-            if (retCode < 0) {
-                LOGGER.error("An error has been occured");
-                return;
-            }
         }
-        retCode = this.waitForWorkQueue();
+
+        int retCode = this.putPage(ePage);
         if (retCode < 0) {
             LOGGER.error("An error has been occured");
             return;
         }
+    }
 
-        pageTimer.stop();
-
+    @Override
+    public void finish() {
+        int retCode = this.waitForWorkQueue();
+        if (retCode < 0) {
+            LOGGER.error("An error has been occured");
+            return;
+        }
         int removeDuplicates = this.htmlTitleDao.removeDuplicates(5);
 
-        LOGGER.info("Html titles (Total: {} Removed: {}) has been prepared in {}ms", this.htmlTitleDao.count(), removeDuplicates,
-                pageTimer.getTime());
-        LOGGER.info("ExplicitLinks (Total: {}) has been created in {}ms", this.linkTupleDao.count(LinkType.ExplicitLink),
-                pageTimer.getTime());
+        LOGGER.info("Html titles (Total: {} Removed: {}) has been prepared", this.htmlTitleDao.count(), removeDuplicates);
+        LOGGER.info("ExplicitLinks (Total: {}) has been created", this.linkTupleDao.count(LinkType.ExplicitLink));
+
     }
 
     @Override
@@ -101,9 +87,10 @@ public class ExplicitLinkAnalyzer extends AbstractLinkAnalyzer {
                     return tuples;
                 }
 
-                for (String url : outgoingUrls) {
-                    tuples.add(new LinkTuple(ePage.getUrl(), LinkType.ExplicitLink, url));
-                }
+                //TODO: Explicit link'lere ihtiyaç olmadığı için kapatıldı.
+                //                for (String url : outgoingUrls) {
+                //                    tuples.add(new LinkTuple(ePage.getUrl(), LinkType.ExplicitLink, url));
+                //                }
 
                 return tuples;
             }

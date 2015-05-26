@@ -7,6 +7,8 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.gun3y.pagerank.common.EPRConstants;
+
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -52,6 +54,16 @@ public class LangUtils {
         }
 
         return builder.toString();
+    }
+
+    public static List<String> extractStemmedWords(String content, int max) {
+        List<String> extractStemmedWords = extractStemmedWords(content);
+
+        if (extractStemmedWords.size() >= EPRConstants.MAX_STEM_COUNT) {
+            return extractStemmedWords.subList(0, EPRConstants.MAX_STEM_COUNT - 1);
+        }
+
+        return extractStemmedWords;
     }
 
     public static List<String> extractStemmedWords(String content) {

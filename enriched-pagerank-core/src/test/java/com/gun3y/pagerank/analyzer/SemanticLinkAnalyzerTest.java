@@ -21,7 +21,7 @@ public class SemanticLinkAnalyzerTest {
     public static void main(String[] args) throws IOException {
         System.out.println(Calendar.getInstance().getTime());
         HtmlTitleDao htmlTitleDao = new HtmlTitleDao();
-        SemanticLinkAnalyzer analyzer = new SemanticLinkAnalyzer(1, null, null, null);
+        SemanticLinkAnalyzer analyzer = new SemanticLinkAnalyzer(1, null, null);
 
         String html = FileUtils.readFileToString(new File(SemanticLinkAnalyzer.class.getClassLoader().getResource("wiki_sample.html")
                 .getPath()));
@@ -46,7 +46,7 @@ public class SemanticLinkAnalyzerTest {
         System.out.println(Calendar.getInstance().getTime());
         HtmlTitleDao htmlTitleDao = new HtmlTitleDao();
 
-        SemanticLinkAnalyzer analyzer = new SemanticLinkAnalyzer(1, null, null, null);
+        SemanticLinkAnalyzer analyzer = new SemanticLinkAnalyzer(1, null, null);
 
         String line = "Wikisource has original text related to this article: England portal";
 

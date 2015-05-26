@@ -72,5 +72,9 @@
 			<groupId>edu.emory.clir</groupId>
 			<artifactId>clearnlp-general-en-dep</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-core</artifactId>
+		</dependency>
 	</dependencies>
 </project>
