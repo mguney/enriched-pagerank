@@ -15,7 +15,6 @@ import com.gun3y.pagerank.aggregator.HtmlAggregator;
 import com.gun3y.pagerank.analyzer.ExplicitLinkAnalyzer;
 import com.gun3y.pagerank.analyzer.ImplicitLinkAnalyzer;
 import com.gun3y.pagerank.analyzer.SemanticLinkAnalyzer;
-import com.gun3y.pagerank.crawler.BasicCrawlController;
 import com.gun3y.pagerank.dao.EnhancedHtmlPageDao;
 import com.gun3y.pagerank.dao.HtmlTitleDao;
 import com.gun3y.pagerank.dao.LinkTupleDao;
@@ -98,30 +97,30 @@ public class MainApp {
             switch (this.op) {
                 case Explicit:
                     ExplicitLinkAnalyzer ex1 = new ExplicitLinkAnalyzer(this.thread, htmlTitleDao, linkTupleDao);
-                    //                    ex1.analyze();
+                    // ex1.analyze();
                     ex1.shutdown();
                     break;
                 case Implicit:
                     ImplicitLinkAnalyzer im1 = new ImplicitLinkAnalyzer(this.thread, htmlTitleDao, linkTupleDao);
-                    //                    im1.analyze();
+                    // im1.analyze();
                     im1.shutdown();
                     break;
                 case Semantic:
                     SemanticLinkAnalyzer sem1 = new SemanticLinkAnalyzer(this.thread, htmlTitleDao, linkTupleDao);
-                    //                    sem1.analyze();
+                    // sem1.analyze();
                     sem1.shutdown();
                     break;
                 case All:
                     ExplicitLinkAnalyzer ex2 = new ExplicitLinkAnalyzer(this.thread, htmlTitleDao, linkTupleDao);
-                    //                    ex2.analyze();
+                    // ex2.analyze();
                     ex2.shutdown();
 
                     ImplicitLinkAnalyzer im2 = new ImplicitLinkAnalyzer(this.thread, htmlTitleDao, linkTupleDao);
-                    //                    im2.analyze();
+                    // im2.analyze();
                     im2.shutdown();
 
                     SemanticLinkAnalyzer sem3 = new SemanticLinkAnalyzer(this.thread, htmlTitleDao, linkTupleDao);
-                    //                    sem3.analyze();
+                    // sem3.analyze();
                     sem3.shutdown();
 
                     break;
@@ -135,7 +134,7 @@ public class MainApp {
                     System.out.println("Test");
                     break;
                 case Crawl:
-                    BasicCrawlController.startCrawler(this.seedFile, htmlPageDao);
+                    System.out.println("Not Implemented");
                     break;
             }
 
